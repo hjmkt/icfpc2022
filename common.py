@@ -1,10 +1,11 @@
 import math
+import numpy as np
 
 class Canvas:
     def __init__(self, width, height):
         self.width = width
         self.height = height
-        self.pixels = [[[255, 255, 255, 255] for _ in range(width)] for _ in range(height)]
+        self.pixels = np.full((height, width, 4), 255)
         self.blocks = {str(0): SimpleBlock(0, 0, width, height, [255, 255, 255, 255], str(0))}
         self.all_blocks = {str(0): SimpleBlock(0, 0, width, height, [255, 255, 255, 255], str(0))} # include removed blocks
         self.coord_to_block_id = [[str(0) for _ in range(width)] for _ in range(height)]
@@ -31,7 +32,7 @@ class Canvas:
                     self.blocks[sub_block.block_id] = sub_block
                     for y in range(sub_block.y, sub_block.y+sub_block.height):
                         for x in range(sub_block.x, sub_block.x+sub_block.width):
-                            self.coord_to_block_id = sub_block.block_id
+                            self.coord_to_block_id[y][x] = sub_block.block_id
                 self.blocks.pop(block.block_id)
             case "lcut":
                 block_id = move.options["block_id"]
@@ -54,16 +55,14 @@ class Canvas:
                     self.blocks[sub_block.block_id] = sub_block
                     for y in range(sub_block.y, sub_block.y+sub_block.height):
                         for x in range(sub_block.x, sub_block.x+sub_block.width):
-                            self.coord_to_block_id = sub_block.block_id
+                            self.coord_to_block_id[y][x] = sub_block.block_id
                 self.blocks.pop(block.block_id)
             case "color":
                 block_id = move.options["block_id"]
                 color = move.options["color"]
                 block = self.blocks[block_id]
                 block.color = color
-                for y in range(block.y, block.y+block.height):
-                    for x in range(block.x, block.x+block.width):
-                        self.pixels[y][x] = color
+                self.pixels[block.y:block.y+block.height, block.x:block.x+block.width] = color
             case "swap":
                 block_id0 = move.options["block_id0"]
                 block_id1 = move.options["block_id1"]
@@ -73,12 +72,8 @@ class Canvas:
                 block0.y, block1.y = block1.y, block0.y
                 block0.width, block1.width = block1.width, block0.width
                 block0.height, block1.height = block1.height, block0.height
-                for y in range(block0.y, block0.y+block0.height):
-                    for x in range(block0.x, block0.x+block0.width):
-                        self.pixels[y][x] = block0.color
-                for y in range(block1.y, block1.y+block1.height):
-                    for x in range(block1.x, block1.x+block1.width):
-                        self.pixels[y][x] = block1.color
+                self.pixels[block0.y:block0.y+block0.height, block0.x:block0.x+block0.width] = block0.color
+                self.pixels[block1.y:block1.y+block1.height, block1.x:block1.x+block1.width] = block1.color
             case "merge":
                 block_id0 = move.options["block_id0"]
                 block_id1 = move.options["block_id1"]
@@ -130,13 +125,9 @@ class Canvas:
     # target: pixels of (HEIGHT, WIDTH, 3) shape
     def compute_similarity(self, target):
         similarity = 0
-        # FIXME replace with numpy
-        for y in range(self.height):
-            for x in range(self.width):
-                d = 0
-                for c in range(4):
-                    d += (self.pixels[y][x][c]-target[y][x][c]) ** 2
-                similarity += math.sqrt(d)
+        d = target - self.pixels
+        d = d ** 2
+        similarity = np.sqrt(d.sum(axis=-1)).sum()
         return similarity * 0.005
 
     def compute_score(self, target):
