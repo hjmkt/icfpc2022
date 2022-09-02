@@ -139,8 +139,8 @@ class Canvas:
                 similarity += math.sqrt(d)
         return similarity * 0.05
 
-    def compute_score(self):
-        pass
+    def compute_score(self, target):
+        return self.get_current_cost() + self.compute_similarity(target)
 
     def eval_move(self, move):
         pass
