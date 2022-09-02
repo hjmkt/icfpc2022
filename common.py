@@ -21,12 +21,11 @@ class Canvas:
                 block_id = move.options["block_id"]
                 (offset_x, offset_y) = move.options["point"]
                 block = self.blocks[block_id]
-                # TODO
                 sub_blocks = [
-                    SimpleBlock(block.x, block.y, offset_x, offset_y, block.color, f"{block.block_id}.0"),
-                    SimpleBlock(block.x+offset_x, block.y, block.width-offset_x, offset_y, block.color, f"{block.block_id}.1"),
-                    SimpleBlock(block.x+offset_x, block.y+offset_y, block.width-offset_x, block.height-offset_y, block.color, f"{block.block_id}.2"),
-                    SimpleBlock(block.x, block.y+offset_y, offset_x, block.height-offset_y, block.color, f"{block.block_id}.3"),
+                    SimpleBlock(block.x, block.y, offset_x-block.x, offset_y-block.y, block.color, f"{block.block_id}.0"),
+                    SimpleBlock(offset_x, block.y, block.x+block.width-offset_x, offset_y-block.y, block.color, f"{block.block_id}.1"),
+                    SimpleBlock(offset_x, offset_y, block.x+block.width-offset_x, block.y+block.height-offset_y, block.color, f"{block.block_id}.2"),
+                    SimpleBlock(block.x, offset_y, offset_x-block.x, block.y+block.height-offset_y, block.color, f"{block.block_id}.3"),
                 ]
                 for sub_block in sub_blocks:
                     self.blocks[sub_block.block_id] = sub_block
@@ -42,14 +41,14 @@ class Canvas:
                 if orientation == "vertical":
                     offset_x = offset
                     sub_blocks = [
-                        SimpleBlock(block.x, block.y, offset_x, block.height, block.color, f"{block.block_id}.0"),
-                        SimpleBlock(block.x+offset_x, block.y, block.width-offset_x, block.height, block.color, f"{block.block_id}.1"),
+                        SimpleBlock(block.x, block.y, offset_x-block.x, block.height, block.color, f"{block.block_id}.0"),
+                        SimpleBlock(offset_x, block.y, block.x+block.width-offset_x, block.height, block.color, f"{block.block_id}.1"),
                     ]
                 else: # horizontal
                     offset_y = offset
                     sub_blocks = [
-                        SimpleBlock(block.x, block.y, block.width, offset_y, block.color, f"{block.block_id}.0"),
-                        SimpleBlock(block.x, block.y+offset_y, block.width, block.height-offset_y, block.color, f"{block.block_id}.1"),
+                        SimpleBlock(block.x, block.y, block.width, offset_y-block.y, block.color, f"{block.block_id}.0"),
+                        SimpleBlock(block.x, offset_y, block.width, block.y + block.height-offset_y, block.color, f"{block.block_id}.1"),
                     ]
                 for sub_block in sub_blocks:
                     self.blocks[sub_block.block_id] = sub_block
@@ -128,7 +127,7 @@ class Canvas:
         d = target - self.pixels
         d = d ** 2
         similarity = np.sqrt(d.sum(axis=-1)).sum()
-        return round(similarity * 0.005)
+        return similarity * 0.005
 
     def compute_score(self, target):
         return self.get_current_cost() + self.compute_similarity(target)
