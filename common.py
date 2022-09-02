@@ -62,7 +62,7 @@ class Canvas:
                 color = move.options["color"]
                 block = self.blocks[block_id]
                 block.color = color
-                self.pixels[block.y:block.y+block.height, block.x:block.x+block.width] = color
+                self.pixels[block.y:block.y+block.height, block.x:block.x+block.width] = [[color]]
             case "swap":
                 block_id0 = move.options["block_id0"]
                 block_id1 = move.options["block_id1"]
@@ -128,7 +128,7 @@ class Canvas:
         d = target - self.pixels
         d = d ** 2
         similarity = np.sqrt(d.sum(axis=-1)).sum()
-        return similarity * 0.005
+        return round(similarity * 0.005)
 
     def compute_score(self, target):
         return self.get_current_cost() + self.compute_similarity(target)

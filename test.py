@@ -14,6 +14,7 @@ moves = [
 
 target_image = cv2.imread("./6.png", cv2.IMREAD_UNCHANGED)
 target_image = target_image[::-1, :, :]
+target_image = cv2.cvtColor(target_image, cv2.COLOR_BGRA2RGBA)
 
 similarity = canvas.compute_similarity(target_image)
 print(f"similarity = {similarity}")
@@ -28,5 +29,5 @@ cost = canvas.get_current_cost()
 similarity = canvas.compute_similarity(target_image)
 print(f"cost = {cost}")
 print(f"similarity = {similarity}")
-cv2.imshow("post", canvas.pixels.astype(np.uint8))
+cv2.imshow("post", cv2.cvtColor(canvas.pixels.astype(np.uint8), cv2.COLOR_BGRA2RGBA))
 cv2.waitKey(0)
