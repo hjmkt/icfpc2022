@@ -3,8 +3,8 @@ class Canvas:
         self.width = width
         self.height = height
         self.pixels = [[[255, 255, 255, 255] for _ in range(width)] for _ in range(height)]
-        self.blocks = {str(0): SimpleBlock(width, height, [255, 255, 255, 255], str(0))}
-        self.all_blocks = {str(0): SimpleBlock(width, height, [255, 255, 255, 255], str(0))} # include removed blocks
+        self.blocks = {str(0): SimpleBlock(0, 0, width, height, [255, 255, 255, 255], str(0))}
+        self.all_blocks = {str(0): SimpleBlock(0, 0, width, height, [255, 255, 255, 255], str(0))} # include removed blocks
         self.coord_to_block_id = [[str(0) for _ in range(width)] for _ in range(height)]
         self.global_id = 0
         self.moves = []
@@ -33,19 +33,20 @@ class Canvas:
                 self.blocks.pop(block.block_id)
             case "lcut":
                 block_id = move.options["block_id"]
+                block = self.blocks[block_id]
                 orientation = move.options["orientation"]
                 offset = move.options["offset"]
                 if orientation == "vertical":
                     offset_x = offset
                     sub_blocks = [
-                        SimpleBlock(block.x, block.y, x-block.x, y-block.y, block.color, f"{block.block_id}.0"),
-                        SimpleBlock(block.x+offset_x, block.y, block.width-offset_x, y-block.y, block.color, f"{block.block_id}.1"),
+                        SimpleBlock(block.x, block.y, offset_x-block.x, block.height, block.color, f"{block.block_id}.0"),
+                        SimpleBlock(block.x+offset_x, block.y, block.width-offset_x, block.height, block.color, f"{block.block_id}.1"),
                     ]
                 else: # horizontal
                     offset_y = offset
                     sub_blocks = [
-                        SimpleBlock(block.x, block.y, x-block.x, y-block.y, block.color, f"{block.block_id}.0"),
-                        SimpleBlock(block.x, block.y+offset_y, x-block.x, block.height-offset_y, block.color, f"{block.block_id}.1"),
+                        SimpleBlock(block.x, block.y, block.width, offset_y-block.y, block.color, f"{block.block_id}.0"),
+                        SimpleBlock(block.x, block.y+offset_y, block.width, block.height-offset_y, block.color, f"{block.block_id}.1"),
                     ]
                 for sub_block in sub_blocks:
                     self.blocks[sub_block.block_id] = sub_block
