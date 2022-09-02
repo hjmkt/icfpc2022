@@ -23,10 +23,10 @@ class Canvas:
                 block = self.blocks[block_id]
                 # TODO
                 sub_blocks = [
-                    SimpleBlock(block.x, block.y, x-block.x, y-block.y, block.color, f"{block.block_id}.0"),
-                    SimpleBlock(block.x+offset_x, block.y, block.width-offset_x, y-block.y, block.color, f"{block.block_id}.1"),
+                    SimpleBlock(block.x, block.y, offset_x, offset_y, block.color, f"{block.block_id}.0"),
+                    SimpleBlock(block.x+offset_x, block.y, block.width-offset_x, offset_y, block.color, f"{block.block_id}.1"),
                     SimpleBlock(block.x+offset_x, block.y+offset_y, block.width-offset_x, block.height-offset_y, block.color, f"{block.block_id}.2"),
-                    SimpleBlock(block.x, block.y+offset_y, x-block.x, block.height-offset_y, block.color, f"{block.block_id}.3"),
+                    SimpleBlock(block.x, block.y+offset_y, offset_x, block.height-offset_y, block.color, f"{block.block_id}.3"),
                 ]
                 for sub_block in sub_blocks:
                     self.blocks[sub_block.block_id] = sub_block
