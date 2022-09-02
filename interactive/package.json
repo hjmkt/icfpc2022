@@ -10,6 +10,7 @@
     "elm-hot": "^1.1.6",
     "node-elm-compiler": "^5.0.6",
     "parcel-bundler": "^1.12.5",
+    "parcel-plugin-static-files-copy": "^2.6.0",
     "prettier": "^2.7.1",
     "prettier-plugin-elm": "^0.8.0",
     "prettier-plugin-packagejson": "^2.2.18",
