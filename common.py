@@ -4,10 +4,15 @@ class Canvas:
         self.height = height
         self.pixels = [[[255, 255, 255, 255] for _ in range(width)] for _ in range(height)]
         self.blocks = {str(0): SimpleBlock(width, height, [255, 255, 255, 255], str(0))}
+        self.all_blocks = {str(0): SimpleBlock(width, height, [255, 255, 255, 255], str(0))} # include removed blocks
         self.coord_to_block_id = [[str(0) for _ in range(width)] for _ in range(height)]
         self.global_id = 0
+        self.moves = []
+        self.current_cost = 0
 
     def exec_move(self, move):
+        self.moves.append(move)
+        self.current_cost += self.compute_cost(move)
         match move.move_type:
             case "pcut":
                 block_id = move.options["block_id"]
@@ -87,6 +92,46 @@ class Canvas:
                 self.global_id += 1
                 block.block_id = self.global_id
                 self.blocks[block.block_id] = block
+                self.all_blocks[block.block_id] = block
+
+    def get_current_cost(self):
+        return self.current_cost
+
+    def compute_cost(self, move):
+        match move.move_type:
+            case "pcut":
+                block_id = move.options["block_id"]
+                block = self.blocks[block_id]
+                return round(10 * self.width * self.height / block.width / block.height)
+            case "lcut":
+                block_id = move.options["block_id"]
+                block = self.blocks[block_id]
+                return round(7 * self.width * self.height / block.width / block.height)
+            case "color":
+                block_id = move.options["block_id"]
+                block = self.blocks[block_id]
+                return round(5 * self.width * self.height / block.width / block.height)
+            case "swap":
+                block_id0 = move.options["block_id0"]
+                block_id1 = move.options["block_id1"]
+                block0 = self.blocks[block_id0]
+                block1 = self.blocks[block_id1]
+                return round(3 * self.width * self.height / (block0.width * block0.height + block1.width * block1.height))
+            case "merge":
+                block_id0 = move.options["block_id0"]
+                block_id1 = move.options["block_id1"]
+                block0 = self.blocks[block_id0]
+                block1 = self.blocks[block_id1]
+                return round(1 * self.width * self.height / (block0.width * block0.height + block1.width * block1.height))
+
+    def compute_similarity(self):
+        pass
+
+    def compute_score(self):
+        pass
+
+    def eval_move(self, move):
+        pass
 
 class SimpleBlock:
     def __init__(self, x, y, width, height, color, block_id):
