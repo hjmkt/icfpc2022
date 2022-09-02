@@ -1,3 +1,5 @@
+import math
+
 class Canvas:
     def __init__(self, width, height):
         self.width = width
@@ -125,8 +127,17 @@ class Canvas:
                 block1 = self.blocks[block_id1]
                 return round(1 * self.width * self.height / (block0.width * block0.height + block1.width * block1.height))
 
-    def compute_similarity(self):
-        pass
+    # target: pixels of (HEIGHT, WIDTH, 3) shape
+    def compute_similarity(self, target):
+        similarity = 0
+        # FIXME replace with numpy
+        for y in range(self.height):
+            for x in range(self.width):
+                d = 0
+                for c in range(4):
+                    d += (self.pixels[y][x][c]-target[y][x][c]) ** 2
+                similarity += math.sqrt(d)
+        return similarity * 0.05
 
     def compute_score(self):
         pass
