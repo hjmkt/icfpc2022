@@ -137,7 +137,7 @@ class Canvas:
                 for c in range(4):
                     d += (self.pixels[y][x][c]-target[y][x][c]) ** 2
                 similarity += math.sqrt(d)
-        return similarity * 0.05
+        return similarity * 0.005
 
     def compute_score(self, target):
         return self.get_current_cost() + self.compute_similarity(target)
