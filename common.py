@@ -42,13 +42,13 @@ class Canvas:
                 if orientation == "vertical":
                     offset_x = offset
                     sub_blocks = [
-                        SimpleBlock(block.x, block.y, offset_x-block.x, block.height, block.color, f"{block.block_id}.0"),
+                        SimpleBlock(block.x, block.y, offset_x, block.height, block.color, f"{block.block_id}.0"),
                         SimpleBlock(block.x+offset_x, block.y, block.width-offset_x, block.height, block.color, f"{block.block_id}.1"),
                     ]
                 else: # horizontal
                     offset_y = offset
                     sub_blocks = [
-                        SimpleBlock(block.x, block.y, block.width, offset_y-block.y, block.color, f"{block.block_id}.0"),
+                        SimpleBlock(block.x, block.y, block.width, offset_y, block.color, f"{block.block_id}.0"),
                         SimpleBlock(block.x, block.y+offset_y, block.width, block.height-offset_y, block.color, f"{block.block_id}.1"),
                     ]
                 for sub_block in sub_blocks:
@@ -62,7 +62,7 @@ class Canvas:
                 color = move.options["color"]
                 block = self.blocks[block_id]
                 block.color = color
-                self.pixels[block.y:block.y+block.height, block.x:block.x+block.width] = [[color]]
+                self.pixels[block.y:block.y+block.height, block.x:block.x+block.width] = color
             case "swap":
                 block_id0 = move.options["block_id0"]
                 block_id1 = move.options["block_id1"]
