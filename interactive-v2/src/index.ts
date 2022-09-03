@@ -20,18 +20,21 @@ jsonButton.addEventListener("click", () => {
 
 const problemSelector = document.getElementById("problem") as HTMLSelectElement;
 problemSelector?.addEventListener("change", () => {
-    changeProblem(problemSelector.value);
+    changeProblem(problemSelector.value).then(() => {
+        runCode("");
+    })
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-    const numProblems = 25;
+    const numProblems = 30;
     for (let i = 1; i <= numProblems; i++) {
         const option = document.createElement("option");
         option.innerText = `${i}`;
         problemSelector.appendChild(option);
     }
-    changeProblem("1");
-    runCode("");
+    changeProblem("1").then(() => {
+        runCode("");
+    });
 
     setupOverlay();
 });
