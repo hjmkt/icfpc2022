@@ -237,6 +237,17 @@ export function setupOverlay() {
         console.log(`[${r}, ${g}, ${b}, ${a}]`);
     });
 
+    leftCanvas.on("pointerdown", () => {
+        const pos = leftCanvas.getRelativePointerPosition();
+        const x = Math.max(0, Math.min(399, Math.floor(pos.x) + 1));
+        const y = 400 - Math.max(0, Math.min(399, Math.floor(pos.y) + 1));
+        const blocks = getPointerBlocks(x, y);
+        const first = blocks[0];
+        if (first) {
+            console.log(first.id);
+        }
+    });
+
     stage.add(inspectLayer);
     stage.add(leftLayer);
     stage.add(rightLayer);
