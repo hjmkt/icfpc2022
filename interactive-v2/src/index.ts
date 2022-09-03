@@ -3,6 +3,7 @@ import "brace/theme/solarized_light";
 import { runCode } from "./utils";
 import { setupOverlay } from "./canvasOverlay";
 import { changeProblem } from "./problems";
+import { parseAndDownloadIsl } from "./parser";
 
 const editor = ace.edit("isl");
 editor.setTheme("ace/theme/solarized_light");
@@ -10,6 +11,11 @@ editor.setTheme("ace/theme/solarized_light");
 const runButton = document.getElementById("runButton") as HTMLButtonElement;
 runButton.addEventListener("click", () => {
     runCode(editor.getValue());
+});
+
+const jsonButton = document.getElementById("jsonButton") as HTMLButtonElement;
+jsonButton.addEventListener("click", () => {
+    parseAndDownloadIsl(editor.getValue());
 });
 
 const problemSelector = document.getElementById("problem") as HTMLSelectElement;
