@@ -1,12 +1,15 @@
-import {Frame, Interpreter, Painter, SimilarityChecker} from "./mini-vinci";
+import {Interpreter, Painter} from "./mini-vinci";
 import * as ace from "brace";
 import "brace/theme/solarized_light";
+import {drawCanvas} from "./utils";
+import {setupOverlay} from "./canvasOverlay";
+import {calcScore, changeProblem} from "./problems";
 
 const editor = ace.edit("isl");
 editor.setTheme("ace/theme/solarized_light")
 
-const runButton = document.getElementById("runButton");
-runButton?.addEventListener("click", () => {
+const runButton = document.getElementById("runButton") as HTMLButtonElement;
+runButton.addEventListener("click", () => {
     const islText  = editor.getValue();
 
     const interpreter = new Interpreter();
@@ -17,6 +20,8 @@ runButton?.addEventListener("click", () => {
 
     const canvas = document.getElementById("leftCanvas") as HTMLCanvasElement;
     drawCanvas(canvas, renderedData);
+
+    calcScore(interpretedStructure.cost, renderedData);
 });
 
 const problemSelector = document.getElementById("problem") as HTMLSelectElement;
@@ -33,36 +38,5 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     changeProblem("1");
 
-
+    setupOverlay();
 });
-
-function changeProblem(id: string): void {
-    fetch(`/${id}.json`).then(response => {
-        response.json().then(data => {
-            const rightCanvas = document.getElementById("rightCanvas") as HTMLCanvasElement;
-            drawCanvas(rightCanvas, SimilarityChecker.dataToFrame(data));
-        })
-    });
-}
-
-function drawCanvas(canvas: HTMLCanvasElement, frame: Frame): void {
-    const context = canvas.getContext("2d");
-    if (context === null) return;
-
-    const width = 400;
-    const height = 400;
-
-    const imageData = context.createImageData(width, height);
-    let idx = 0;
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            const rgba = frame[y * width + x];
-            if (!rgba) continue;
-            imageData.data[idx++] = rgba.r;
-            imageData.data[idx++] = rgba.g;
-            imageData.data[idx++] = rgba.b;
-            imageData.data[idx++] = rgba.a;
-        }
-    }
-    context.putImageData(imageData, 0, 0);
-}

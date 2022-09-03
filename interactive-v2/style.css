@@ -34,3 +34,26 @@ canvas {
     top: 420px;
     left: 10px;
 }
+
+#canvas-overlay {
+    position: fixed;
+    top: 10px;
+    left: 320px;
+
+}
+
+#rightCanvasText {
+    position: fixed;
+    top: 420px;
+    left: 730px;
+    width: 402px;
+    font-family: monospace;
+}
+
+#leftCanvasText {
+    position: fixed;
+    top: 420px;
+    left: 320px;
+    width: 402px;
+    font-family: monospace;
+}
