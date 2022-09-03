@@ -1,5 +1,5 @@
 import { BlockType, ComplexBlock, SimpleBlock } from "./Block";
-import { Canvas } from "./Canvas";
+import { Canvas, CanvasSpec } from "./Canvas";
 import {
     ColorInstruction,
     HorizontalCutInstruction,
@@ -35,7 +35,7 @@ export class Interpreter {
         this.topLevelIdCounter = 0;
     }
 
-    run(code: string): InterpreterResult {
+    run(code: string, initSpec: CanvasSpec): InterpreterResult {
         let parser = new Parser();
         let result = parser.parse(code);
         if (result.typ === "error") {
@@ -43,11 +43,9 @@ export class Interpreter {
             throw Error(`At ${lineNumber}, encountered: ${error}!`);
         }
         let program = result.result as Program;
-        let canvas = new Canvas(
-            program.metaData.width,
-            program.metaData.height,
-            program.metaData.backgroundColor
-        );
+        let canvas = new Canvas(initSpec);
+        this.topLevelIdCounter = initSpec.blocks.length - 1;
+
         let totalCost = 0;
         for (let index = 0; index < program.instructions.length; index++) {
             const result = this.interpret(

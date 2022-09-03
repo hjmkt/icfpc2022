@@ -51,7 +51,7 @@ canvas {
 
 #leftCanvasText {
     position: fixed;
-    top: 420px;
+    top: 450px;
     left: 320px;
     width: 402px;
     font-family: monospace;
@@ -59,8 +59,22 @@ canvas {
 
 #costText {
     position: fixed;
-    top: 420px;
-    left: 120px;
+    top: 450px;
+    left: 10px;
     width: 280px;
+    font-family: monospace;
+}
+
+#range {
+    position: fixed;
+    top: 420px;
+    left: 350px;
+    width: 370px;
+}
+
+#timestamp {
+    position: fixed;
+    top: 420px;
+    left: 320px;
     font-family: monospace;
 }

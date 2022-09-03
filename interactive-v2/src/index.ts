@@ -1,8 +1,9 @@
 import * as ace from "brace";
 import "brace/theme/solarized_light";
-import { runCode } from "./utils";
+import {runCode, untilLine} from "./utils";
 import { setupOverlay } from "./canvasOverlay";
 import { changeProblem } from "./problems";
+import { parseAndDownloadIsl } from "./parser";
 
 const editor = ace.edit("isl");
 editor.setTheme("ace/theme/solarized_light");
@@ -12,20 +13,38 @@ runButton.addEventListener("click", () => {
     runCode(editor.getValue());
 });
 
+const jsonButton = document.getElementById("jsonButton") as HTMLButtonElement;
+jsonButton.addEventListener("click", () => {
+    parseAndDownloadIsl(editor.getValue());
+});
+
+const range = document.getElementById("range") as HTMLInputElement;
+range.addEventListener("input", () => {
+    (document.getElementById("timestamp") as HTMLDivElement).innerText = range.value;
+
+    const code = untilLine(editor.getValue(), Number(range.value));
+    runCode(code, false);
+});
+
+
+
 const problemSelector = document.getElementById("problem") as HTMLSelectElement;
 problemSelector?.addEventListener("change", () => {
-    changeProblem(problemSelector.value);
+    changeProblem(problemSelector.value).then(() => {
+        runCode("");
+    });
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-    const numProblems = 25;
+    const numProblems = 30;
     for (let i = 1; i <= numProblems; i++) {
         const option = document.createElement("option");
         option.innerText = `${i}`;
         problemSelector.appendChild(option);
     }
-    changeProblem("1");
-    runCode("");
+    changeProblem("1").then(() => {
+        runCode("");
+    });
 
     setupOverlay();
 });
