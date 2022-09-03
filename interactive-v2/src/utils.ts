@@ -36,6 +36,11 @@ export function runCode(islText: string, resetRange = true): void {
     const canvas = document.getElementById("leftCanvas") as HTMLCanvasElement;
     drawCanvas(canvas, renderedData);
 
+    const overlayCanvas = document.getElementById(
+        "rightCanvasOverlay"
+    ) as HTMLCanvasElement;
+    drawCanvas(overlayCanvas, renderedData);
+
     calcScore(interpretedStructure.cost, renderedData);
 
     if (resetRange) {

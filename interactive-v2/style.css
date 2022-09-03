@@ -29,6 +29,21 @@ canvas {
     left: 730px;
 }
 
+#rightCanvasOverlay {
+    position: fixed;
+    top: 10px;
+    left: 730px;
+    opacity: 75%;
+    display: none;
+}
+
+#overlay {
+    position: fixed;
+    top: 420px;
+    left: 1070px;
+    width: 60px;
+}
+
 #contents {
     position: fixed;
     top: 420px;

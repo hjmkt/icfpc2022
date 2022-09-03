@@ -18,6 +18,20 @@ jsonButton.addEventListener("click", () => {
     parseAndDownloadIsl(editor.getValue());
 });
 
+const overlayButton = document.getElementById("overlay") as HTMLButtonElement;
+overlayButton.addEventListener("mousedown", () => {
+    const overlay = document.getElementById(
+        "rightCanvasOverlay"
+    ) as HTMLCanvasElement;
+    overlay.style.display = "block";
+});
+overlayButton.addEventListener("mouseup", () => {
+    const overlay = document.getElementById(
+        "rightCanvasOverlay"
+    ) as HTMLCanvasElement;
+    overlay.style.display = "none";
+});
+
 const range = document.getElementById("range") as HTMLInputElement;
 range.addEventListener("input", () => {
     (document.getElementById("timestamp") as HTMLDivElement).innerText =
