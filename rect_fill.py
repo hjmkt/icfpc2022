@@ -2,6 +2,7 @@ from common import *
 from util import *
 import cv2
 import numpy as np
+import sys
 from concurrent.futures import ProcessPoolExecutor
 
 
@@ -16,7 +17,8 @@ def compute_score_diff(canvas, target, rect):
     first_rect_size = max((x+width)*(y+height), (canvas.width-x)*(y+height), (x+width)*(canvas.height-y), (canvas.width-x)*(canvas.height-y))
     cost = round(10*0.005) + round(10 * canvas.width * canvas.height / first_rect_size)
     cost += round(5 * canvas.width * canvas.height / width / height * 0.005)
-    merge_cost = round(1*0.005) + round(1 * canvas.width * canvas.height / first_rect_size)
+    # merge_cost = round(1*0.005) + round(1 * canvas.width * canvas.height / first_rect_size)
+    merge_cost = cost*2 + 100 # FIXME
     score_diff = cand_diff - current_diff + cost + merge_cost
     return score_diff
 
@@ -25,6 +27,7 @@ def refine(canvas_target_start_rect):
     rect = start_rect
     local_best_diff = compute_score_diff(canvas, target, rect)
     for step in [16, 4, 1]:
+    # for step in [4, 1]:
         while True:
             [[x, y, width, height], [r, g, b, a]] = rect
             cand_rects = []
@@ -65,18 +68,19 @@ def refine(canvas_target_start_rect):
                 if diff<tmp_best_diff:
                     tmp_best_diff = diff
                     tmp_best_rect = cand_rect
-            if tmp_best_diff==0:
+            if tmp_best_diff==local_best_diff:
                 break
             rect[0] = tmp_best_rect[0]
             rect[1] = tmp_best_rect[1]
             if tmp_best_diff<local_best_diff:
                 local_best_diff = tmp_best_diff
+                # print("local", rect, local_best_diff, file=sys.stderr)
             else:
                 break
     return rect, local_best_diff
 
 
-def find_cand_rect(canvas, target, num_seeds=16):
+def find_cand_rect(canvas, target, num_seeds=64):
     start_rects = [[[np.random.randint(0, canvas.width), np.random.randint(0, canvas.height), 1, 1], np.random.randint(0, 256, (4))] for _ in range(num_seeds)]
     
     best_rect = None
@@ -87,8 +91,152 @@ def find_cand_rect(canvas, target, num_seeds=16):
         if local_best_diff<best_diff:
             best_diff = local_best_diff
             best_rect = local_best_rect
+            print(best_rect, best_diff, file=sys.stderr)
 
     return (best_rect, best_diff)
+
+def rect_to_moves(canvas, rect):
+    [[x, y, width, height], color] = rect
+    if x==0:
+        if x+width==canvas.width:
+            if y==0:
+                if y+height==canvas.height:
+                    return []
+                else:
+                    return [
+                        Move("lcut", {"block_id": canvas.coord_to_block_id[y][x], "orientation": "horizontal", "offset": y+height}),
+                        Move("color", {"block_id": f"{canvas.coord_to_block_id[y][x]}.0", "color": color}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.0", "block_id1": f"{canvas.coord_to_block_id[y][x]}.1"}),
+                    ]
+            else:
+                if y+height==canvas.height:
+                    return [
+                        Move("lcut", {"block_id": canvas.coord_to_block_id[y][x], "orientation": "horizontal", "offset": y}),
+                        Move("color", {"block_id": f"{canvas.coord_to_block_id[y][x]}.1", "color": color}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.0", "block_id1": f"{canvas.coord_to_block_id[y][x]}.1"}),
+                    ]
+                else:
+                    return [
+                        Move("lcut", {"block_id": canvas.coord_to_block_id[y][x], "orientation": "horizontal", "offset": y}),
+                        Move("lcut", {"block_id": f"{canvas.coord_to_block_id[y][x]}.1", "orientation": "horizontal", "offset": y+height}),
+                        Move("color", {"block_id": f"{canvas.coord_to_block_id[y][x]}.1.0", "color": color}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.1.0", "block_id1": f"{canvas.coord_to_block_id[y][x]}.1.1"}),
+                        Move("merge", {"block_id0": f"{canvas.global_id+1}", "block_id1": f"{canvas.coord_to_block_id[y][x]}.0"}),
+                    ]
+        else:
+            if y==0:
+                if y+height==canvas.height:
+                    return [
+                        Move("lcut", {"block_id": canvas.coord_to_block_id[y][x], "orientation": "vertical", "offset": x+width}),
+                        Move("color", {"block_id": f"{canvas.coord_to_block_id[y][x]}.0", "color": color}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.0", "block_id1": f"{canvas.coord_to_block_id[y][x]}.1"}),
+                    ]
+                else:
+                    return [
+                        Move("pcut", {"block_id": canvas.coord_to_block_id[y][x], "point": [x+width, y+height]}),
+                        Move("color", {"block_id": f"{canvas.coord_to_block_id[y][x]}.0", "color": color}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.0", "block_id1": f"{canvas.coord_to_block_id[y][x]}.1"}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.2", "block_id1": f"{canvas.coord_to_block_id[y][x]}.3"}),
+                        Move("merge", {"block_id0": f"{canvas.global_id+1}", "block_id1": f"{canvas.global_id+2}"}),
+                    ]
+            else:
+                if y+height==canvas.height:
+                    return [
+                        Move("pcut", {"block_id": canvas.coord_to_block_id[y][x], "point": [x+width, y]}),
+                        Move("color", {"block_id": f"{canvas.coord_to_block_id[y][x]}.3", "color": color}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.0", "block_id1": f"{canvas.coord_to_block_id[y][x]}.1"}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.2", "block_id1": f"{canvas.coord_to_block_id[y][x]}.3"}),
+                        Move("merge", {"block_id0": f"{canvas.global_id+1}", "block_id1": f"{canvas.global_id+2}"}),
+                    ]
+                else:
+                    return [
+                        Move("pcut", {"block_id": canvas.coord_to_block_id[y][x], "point": [x+width, y]}),
+                        Move("lcut", {"block_id": f"{canvas.coord_to_block_id[y][x]}.3", "orientation": "horizontal", "offset": y+height}),
+                        Move("color", {"block_id": f"{canvas.coord_to_block_id[y][x]}.3.0", "color": color}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.3.0", "block_id1": f"{canvas.coord_to_block_id[y][x]}.3.1"}),
+                        Move("merge", {"block_id0": f"{canvas.global_id+1}", "block_id1": f"{canvas.coord_to_block_id[y][x]}.2"}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.0", "block_id1": f"{canvas.coord_to_block_id[y][x]}.1"}),
+                        Move("merge", {"block_id0": f"{canvas.global_id+2}", "block_id1": f"{canvas.global_id+3}"}),
+                    ]
+    else:
+        if x+width==canvas.width:
+            if y==0:
+                if y+height==canvas.height:
+                    return [
+                        Move("lcut", {"block_id": canvas.coord_to_block_id[y][x], "orientation": "vertical", "offset": x}),
+                        Move("color", {"block_id": f"{canvas.coord_to_block_id[y][x]}.1", "color": color}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.0", "block_id1": f"{canvas.coord_to_block_id[y][x]}.1"}),
+                    ]
+                else:
+                    return [
+                        Move("pcut", {"block_id": canvas.coord_to_block_id[y][x], "point": [x, y+height]}),
+                        Move("color", {"block_id": f"{canvas.coord_to_block_id[y][x]}.1", "color": color}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.0", "block_id1": f"{canvas.coord_to_block_id[y][x]}.1"}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.2", "block_id1": f"{canvas.coord_to_block_id[y][x]}.3"}),
+                        Move("merge", {"block_id0": f"{canvas.global_id+1}", "block_id1": f"{canvas.global_id+2}"}),
+                    ]
+            else:
+                if y+height==canvas.height:
+                    return [
+                        Move("pcut", {"block_id": canvas.coord_to_block_id[y][x], "point": [x, y]}),
+                        Move("color", {"block_id": f"{canvas.coord_to_block_id[y][x]}.2", "color": color}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.0", "block_id1": f"{canvas.coord_to_block_id[y][x]}.1"}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.2", "block_id1": f"{canvas.coord_to_block_id[y][x]}.3"}),
+                        Move("merge", {"block_id0": f"{canvas.global_id+1}", "block_id1": f"{canvas.global_id+2}"}),
+                    ]
+                else:
+                    return [
+                        Move("pcut", {"block_id": canvas.coord_to_block_id[y][x], "point": [x, y]}),
+                        Move("lcut", {"block_id": f"{canvas.coord_to_block_id[y][x]}.2", "orientation": "horizontal", "offset": y+height}),
+                        Move("color", {"block_id": f"{canvas.coord_to_block_id[y][x]}.2.0", "color": color}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.2.0", "block_id1": f"{canvas.coord_to_block_id[y][x]}.2.1"}),
+                        Move("merge", {"block_id0": f"{canvas.global_id+1}", "block_id1": f"{canvas.coord_to_block_id[y][x]}.3"}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.0", "block_id1": f"{canvas.coord_to_block_id[y][x]}.1"}),
+                        Move("merge", {"block_id0": f"{canvas.global_id+2}", "block_id1": f"{canvas.global_id+3}"}),
+                    ]
+        else:
+            if y==0:
+                if y+height==canvas.height:
+                    return [
+                        Move("lcut", {"block_id": canvas.coord_to_block_id[y][x], "orientation": "vertical", "offset": x}),
+                        Move("lcut", {"block_id": f"{canvas.coord_to_block_id[y][x]}.1", "orientation": "vertical", "offset": x+width}),
+                        Move("color", {"block_id": f"{canvas.coord_to_block_id[y][x]}.1.0", "color": color}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.1.0", "block_id1": f"{canvas.coord_to_block_id[y][x]}.1.1"}),
+                        Move("merge", {"block_id0": f"{canvas.global_id+1}", "block_id1": f"{canvas.coord_to_block_id[y][x]}.0"}),
+                    ]
+                else:
+                    return [
+                        Move("pcut", {"block_id": canvas.coord_to_block_id[y][x], "point": [x, y+height]}),
+                        Move("lcut", {"block_id": f"{canvas.coord_to_block_id[y][x]}.1", "orientation": "vertical", "offset": x+width}),
+                        Move("color", {"block_id": f"{canvas.coord_to_block_id[y][x]}.1.0", "color": color}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.1.0", "block_id1": f"{canvas.coord_to_block_id[y][x]}.1.1"}),
+                        Move("merge", {"block_id0": f"{canvas.global_id+1}", "block_id1": f"{canvas.coord_to_block_id[y][x]}.0"}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.2", "block_id1": f"{canvas.coord_to_block_id[y][x]}.3"}),
+                        Move("merge", {"block_id0": f"{canvas.global_id+2}", "block_id1": f"{canvas.global_id+3}"}),
+                    ]
+            else:
+                if y+height==canvas.height:
+                    return [
+                        Move("pcut", {"block_id": canvas.coord_to_block_id[y][x], "point": [x, y]}),
+                        Move("lcut", {"block_id": f"{canvas.coord_to_block_id[y][x]}.2", "orientation": "vertical", "offset": x+width}),
+                        Move("color", {"block_id": f"{canvas.coord_to_block_id[y][x]}.2.0", "color": color}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.2.0", "block_id1": f"{canvas.coord_to_block_id[y][x]}.2.1"}),
+                        Move("merge", {"block_id0": f"{canvas.global_id+1}", "block_id1": f"{canvas.coord_to_block_id[y][x]}.3"}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.0", "block_id1": f"{canvas.coord_to_block_id[y][x]}.1"}),
+                        Move("merge", {"block_id0": f"{canvas.global_id+2}", "block_id1": f"{canvas.global_id+3}"}),
+                    ]
+                else:
+                    return [
+                        Move("pcut", {"block_id": canvas.coord_to_block_id[y][x], "point": [x, y]}),
+                        Move("pcut", {"block_id": f"{canvas.coord_to_block_id[y][x]}.2", "point": [x+width, y+height]}),
+                        Move("color", {"block_id": f"{canvas.coord_to_block_id[y][x]}.2.0", "color": color}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.2.0", "block_id1": f"{canvas.coord_to_block_id[y][x]}.2.1"}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.2.2", "block_id1": f"{canvas.coord_to_block_id[y][x]}.2.3"}),
+                        Move("merge", {"block_id0": f"{canvas.global_id+1}", "block_id1": f"{canvas.global_id+2}"}),
+                        Move("merge", {"block_id0": f"{canvas.global_id+3}", "block_id1": f"{canvas.coord_to_block_id[y][x]}.3"}),
+                        Move("merge", {"block_id0": f"{canvas.coord_to_block_id[y][x]}.0", "block_id1": f"{canvas.coord_to_block_id[y][x]}.1"}),
+                        Move("merge", {"block_id0": f"{canvas.global_id+4}", "block_id1": f"{canvas.global_id+5}"}),
+                    ]
 
 # canvas = Canvas(400, 400)
 # target_image = cv2.imread("./1.png", cv2.IMREAD_UNCHANGED)

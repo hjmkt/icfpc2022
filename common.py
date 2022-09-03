@@ -94,6 +94,9 @@ class Canvas:
                 self.blocks.pop(block_id1)
                 self.blocks[block.block_id] = block
                 self.all_blocks[block.block_id] = block
+                for y in range(block.y, block.y+block.height):
+                    for x in range(block.x, block.x+block.width):
+                        self.coord_to_block_id[y][x] = block.block_id
 
     def get_current_cost(self):
         return self.current_cost
