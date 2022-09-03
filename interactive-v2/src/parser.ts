@@ -1,6 +1,6 @@
-import {Parser} from "./mini-vinci/Parser";
-import {Program} from "./mini-vinci/Program";
-import {InstructionType} from "./mini-vinci/Instruction";
+import { Parser } from "./mini-vinci/Parser";
+import { Program } from "./mini-vinci/Program";
+import { InstructionType } from "./mini-vinci/Instruction";
 
 export function parseAndDownloadIsl(code: string): void {
     const parser = new Parser();
@@ -8,11 +8,11 @@ export function parseAndDownloadIsl(code: string): void {
 
     const result: any = [];
 
-    program.instructions.forEach(inst => {
+    program.instructions.forEach((inst) => {
         switch (inst.typ) {
             case InstructionType.NopInstructionType:
                 result.push({
-                    typ: "Nop"
+                    typ: "Nop",
                 });
                 break;
             case InstructionType.CommentInstructionType:
@@ -25,28 +25,33 @@ export function parseAndDownloadIsl(code: string): void {
                 result.push({
                     typ: "Color",
                     blockId: inst.blockId,
-                    color: { r: inst.color.r, g: inst.color.g, b: inst.color.b, a: inst.color.a }
+                    color: {
+                        r: inst.color.r,
+                        g: inst.color.g,
+                        b: inst.color.b,
+                        a: inst.color.a,
+                    },
                 });
                 break;
             case InstructionType.PointCutInstructionType:
                 result.push({
                     typ: "PointCut",
                     blockId: inst.blockId,
-                    point: {x: inst.point.px, y: inst.point.py}
+                    point: { x: inst.point.px, y: inst.point.py },
                 });
                 break;
             case InstructionType.VerticalCutInstructionType:
                 result.push({
                     typ: "VerticalCut",
                     blockId: inst.blockId,
-                    lineNumber: inst.lineNumber
+                    lineNumber: inst.lineNumber,
                 });
                 break;
             case InstructionType.HorizontalCutInstructionType:
                 result.push({
                     typ: "HorizontalCut",
                     blockId: inst.blockId,
-                    lineNumber: inst.lineNumber
+                    lineNumber: inst.lineNumber,
                 });
                 break;
             case InstructionType.SwapInstructionType:
@@ -67,7 +72,7 @@ export function parseAndDownloadIsl(code: string): void {
     });
 
     const json = JSON.stringify(result, null, 4);
-    const blob = new Blob([json], { type: "application/json"});
+    const blob = new Blob([json], { type: "application/json" });
 
     const link = document.createElement("a");
     document.body.appendChild(link);

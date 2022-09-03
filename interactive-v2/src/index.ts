@@ -3,7 +3,7 @@ import "brace/theme/solarized_light";
 import { runCode } from "./utils";
 import { setupOverlay } from "./canvasOverlay";
 import { changeProblem } from "./problems";
-import {parseAndDownloadIsl} from "./parser";
+import { parseAndDownloadIsl } from "./parser";
 
 const editor = ace.edit("isl");
 editor.setTheme("ace/theme/solarized_light");
