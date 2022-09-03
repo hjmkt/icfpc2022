@@ -18,7 +18,8 @@ def compute_score_diff(canvas, target, rect):
     cost = round(10*0.005) + round(10 * canvas.width * canvas.height / first_rect_size)
     cost += round(5 * canvas.width * canvas.height / width / height * 0.005)
     # merge_cost = round(1*0.005) + round(1 * canvas.width * canvas.height / first_rect_size)
-    merge_cost = cost*2 + 100 # FIXME
+    merge_cost = cost*2 + 600 # FIXME
+    # merge_cost = 0
     score_diff = cand_diff - current_diff + cost + merge_cost
     return score_diff
 
@@ -80,7 +81,7 @@ def refine(canvas_target_start_rect):
     return rect, local_best_diff
 
 
-def find_cand_rect(canvas, target, num_seeds=64):
+def find_cand_rect(canvas, target, num_seeds=16):
     start_rects = [[[np.random.randint(0, canvas.width), np.random.randint(0, canvas.height), 1, 1], np.random.randint(0, 256, (4))] for _ in range(num_seeds)]
     
     best_rect = None
@@ -101,7 +102,9 @@ def rect_to_moves(canvas, rect):
         if x+width==canvas.width:
             if y==0:
                 if y+height==canvas.height:
-                    return []
+                    return [
+                        Move("color", {"block_id": f"{canvas.coord_to_block_id[y][x]}", "color": color}),
+                    ]
                 else:
                     return [
                         Move("lcut", {"block_id": canvas.coord_to_block_id[y][x], "orientation": "horizontal", "offset": y+height}),
