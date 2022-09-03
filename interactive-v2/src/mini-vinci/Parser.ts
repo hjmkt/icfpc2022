@@ -1,4 +1,4 @@
-import { Program, ProgramMetaData } from "./Program";
+import { Program } from "./Program";
 import {
   Instruction,
   InstructionType,
@@ -110,6 +110,7 @@ export class Parser {
     if (lineCutMatchResult) {
       const blockId = lineCutMatchResult[1];
       const orientation = lineCutMatchResult[5];
+      // @ts-ignore
       const lineNumber = +lineCutMatchResult[6];
       if (orientation === "x" || orientation === "X") {
         const typ = InstructionType.VerticalCutInstructionType;
@@ -130,7 +131,9 @@ export class Parser {
     if (pointCutMatchResult) {
       const typ = InstructionType.PointCutInstructionType;
       const blockId = pointCutMatchResult[1];
+      // @ts-ignore
       const px = +pointCutMatchResult[6];
+      // @ts-ignore
       const py = +pointCutMatchResult[7];
       const point = new Point([px, py]);
       return {

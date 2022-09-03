@@ -1,7 +1,7 @@
-import {Frame, Interpreter, Painter} from "./mini-vinci";
+import {Frame, Interpreter, Painter, SimilarityChecker} from "./mini-vinci";
 
-const button1 = document.getElementById("button1");
-button1?.addEventListener("click", () => {
+const runButton = document.getElementById("runButton");
+runButton?.addEventListener("click", () => {
     const isl = document.getElementById("isl") as HTMLTextAreaElement;
     const islText  = isl.value;
 
@@ -11,9 +11,27 @@ button1?.addEventListener("click", () => {
     const painter = new Painter();
     const renderedData = painter.draw(interpretedStructure.canvas);
 
-    const canvas = document.getElementById("canvas1") as HTMLCanvasElement;
+    const canvas = document.getElementById("leftCanvas") as HTMLCanvasElement;
     drawCanvas(canvas, renderedData);
 });
+
+const problemSelector = document.getElementById("problem") as HTMLSelectElement;
+problemSelector?.addEventListener("change", () => {
+    changeProblem(problemSelector.value);
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+   changeProblem("1");
+});
+
+function changeProblem(id: string): void {
+    fetch(`/${id}.json`).then(response => {
+        response.json().then(data => {
+            const rightCanvas = document.getElementById("rightCanvas") as HTMLCanvasElement;
+            drawCanvas(rightCanvas, SimilarityChecker.dataToFrame(data));
+        })
+    });
+}
 
 function drawCanvas(canvas: HTMLCanvasElement, frame: Frame): void {
     const context = canvas.getContext("2d");
