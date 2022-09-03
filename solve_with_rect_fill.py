@@ -6,7 +6,7 @@ from rect_fill import *
 
 canvas = Canvas(400, 400)
 
-target_image = cv2.imread("./7.png", cv2.IMREAD_UNCHANGED)
+target_image = cv2.imread("./11.png", cv2.IMREAD_UNCHANGED)
 target_image = target_image[::-1, :, :]
 target_image = cv2.cvtColor(target_image, cv2.COLOR_BGRA2RGBA)
 
