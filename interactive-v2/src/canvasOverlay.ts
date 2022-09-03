@@ -171,6 +171,28 @@ export function setupOverlay() {
         ).innerText = text;
     }
 
+    function lineVisible(visible: boolean) {
+        if (visible) {
+            rightVLine1.show();
+            rightVLine2.show();
+            leftVLine1.show();
+            leftVLine2.show();
+            rightHLine1.show();
+            rightHLine2.show();
+            leftHLine1.show();
+            leftHLine2.show();
+        } else {
+            rightVLine1.hide();
+            rightVLine2.hide();
+            leftVLine1.hide();
+            leftVLine2.hide();
+            rightHLine1.hide();
+            rightHLine2.hide();
+            leftHLine1.hide();
+            leftHLine2.hide();
+        }
+    }
+
     function queryPointerBlocks(pos: { x: number; y: number }) {
         const x = Math.max(0, Math.min(399, Math.floor(pos.x) + 1));
         const y = 400 - Math.max(0, Math.min(399, Math.floor(pos.y) + 1));
@@ -226,6 +248,16 @@ export function setupOverlay() {
 
     leftCanvas.on("pointerleave", () => {
         inspectLayer.hide();
+        lineVisible(false);
+    });
+    leftCanvas.on("pointerenter", () => {
+        lineVisible(true);
+    });
+    rightCanvas.on("pointerleave", () => {
+        lineVisible(false);
+    });
+    rightCanvas.on("pointerenter", () => {
+        lineVisible(true);
     });
 
     rightCanvas.on("pointerdown", () => {

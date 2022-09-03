@@ -1,6 +1,6 @@
 import * as ace from "brace";
 import "brace/theme/solarized_light";
-import {runCode, untilLine} from "./utils";
+import { runCode, untilLine } from "./utils";
 import { setupOverlay } from "./canvasOverlay";
 import { changeProblem } from "./problems";
 import { parseAndDownloadIsl } from "./parser";
@@ -20,13 +20,12 @@ jsonButton.addEventListener("click", () => {
 
 const range = document.getElementById("range") as HTMLInputElement;
 range.addEventListener("input", () => {
-    (document.getElementById("timestamp") as HTMLDivElement).innerText = range.value;
+    (document.getElementById("timestamp") as HTMLDivElement).innerText =
+        range.value;
 
     const code = untilLine(editor.getValue(), Number(range.value));
     runCode(code, false);
 });
-
-
 
 const problemSelector = document.getElementById("problem") as HTMLSelectElement;
 problemSelector?.addEventListener("change", () => {
