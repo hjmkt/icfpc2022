@@ -18,6 +18,7 @@ export class SimilarityChecker {
         for (let index = 0; index < f1.length; index++) {
             const p1 = f1[index];
             const p2 = f2[index];
+            // @ts-ignore
             diff += this.pixelDiff(p1, p2);
         }
         return Math.round(diff * alpha);

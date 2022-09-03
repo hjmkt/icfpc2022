@@ -59,8 +59,8 @@ canvas {
 
 #costText {
     position: fixed;
-    top: 420px;
-    left: 120px;
+    top: 450px;
+    left: 10px;
     width: 280px;
     font-family: monospace;
 }

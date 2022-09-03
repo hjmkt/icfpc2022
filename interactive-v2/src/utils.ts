@@ -1,5 +1,5 @@
 import { Block, Frame, Interpreter, Painter, VinciCanvas } from "./mini-vinci";
-import { calcScore } from "./problems";
+import {calcScore, getCurrentSpec} from "./problems";
 
 let currentCanvas: VinciCanvas | null = null;
 
@@ -27,7 +27,7 @@ export function drawCanvas(canvas: HTMLCanvasElement, frame: Frame): void {
 
 export function runCode(islText: string): void {
     const interpreter = new Interpreter();
-    const interpretedStructure = interpreter.run(islText);
+    const interpretedStructure = interpreter.run(islText, getCurrentSpec());
 
     const painter = new Painter();
     currentCanvas = interpretedStructure.canvas;

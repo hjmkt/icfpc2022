@@ -1,19 +1,52 @@
-import { drawCanvas } from "./utils";
+import {drawCanvas, runCode} from "./utils";
 import { Frame, SimilarityChecker } from "./mini-vinci";
 import { RGBA } from "./mini-vinci/Color";
+import {CanvasSpec} from "./mini-vinci/Canvas";
 
 let currentFrame: Frame | null = null;
+let currentSpec: CanvasSpec | null = null;
 
-export function changeProblem(id: string): void {
-    fetch(`/${id}.json`).then((response) => {
-        response.json().then((data) => {
-            const rightCanvas = document.getElementById(
-                "rightCanvas"
-            ) as HTMLCanvasElement;
-            currentFrame = SimilarityChecker.dataToFrame(data);
-            drawCanvas(rightCanvas, currentFrame);
-        });
-    });
+export async function changeProblem(id: string): Promise<void> {
+    const response = await fetch(`/${id}.json`);
+    const data = await response.json();
+    const rightCanvas = document.getElementById(
+        "rightCanvas"
+    ) as HTMLCanvasElement;
+    currentFrame = SimilarityChecker.dataToFrame(data);
+    drawCanvas(rightCanvas, currentFrame);
+
+    if (Number(id) <= 25) {
+        currentSpec = {
+            width: 400,
+            height: 400,
+            blocks: [{
+                blockId: "0",
+                bottomLeft: [0, 0],
+                topRight: [400, 400],
+                color: [255, 255, 255, 255]
+            }]
+        };
+        return;
+    }
+
+    const response2 = await fetch(`/${id}.initial.json`);
+    currentSpec = await response2.json();
+
+    runCode("");
+}
+
+export function getCurrentSpec(): CanvasSpec {
+    if (currentSpec) return currentSpec;
+    return {
+        width: 400,
+        height: 400,
+        blocks: [{
+            blockId: "0",
+            bottomLeft: [0, 0],
+            topRight: [400, 400],
+            color: [255, 255, 255, 255]
+        }]
+    };
 }
 
 export function queryPixel(x: number, y: number): RGBA {

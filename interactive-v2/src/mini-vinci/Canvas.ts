@@ -4,31 +4,47 @@ import { Point } from "./Point";
 
 export type Color = RGBA;
 
+export interface CanvasSpec {
+    width: number;
+    height: number;
+    blocks: BlockSpec[];
+}
+
+export interface BlockSpec {
+    blockId: string;
+    bottomLeft: [number, number];
+    topRight: [number, number];
+    color: [number, number, number, number]
+}
+
 export class Canvas {
     width: number;
 
     height: number;
 
-    backgroundColor: Color;
+    // backgroundColor: Color;
 
     blocks: Map<string, Block>;
 
-    constructor(width: number, height: number, backgroundColor: Color) {
+    constructor({width, height, blocks}: CanvasSpec) {
         this.width = width;
         this.height = height;
 
-        this.backgroundColor = backgroundColor;
+        // this.backgroundColor = backgroundColor;
         this.blocks = new Map();
-        this.blocks.set(
-            "0",
-            new SimpleBlock(
-                "0",
-                new Point([0, 0]),
-                new Point([width, height]),
-                backgroundColor
-            )
-        );
+        blocks.forEach(block => {
+            this.blocks.set(
+                block.blockId,
+                new SimpleBlock(
+                    block.blockId,
+                    new Point(block.bottomLeft),
+                    new Point(block.topRight),
+                    { r: block.color[0], g: block.color[1], b: block.color[2], a: block.color[3] }
+                )
+            );
+        });
     }
+
 
     get size(): Point {
         return new Point([this.width, this.height]);
