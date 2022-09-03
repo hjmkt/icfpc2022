@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Interactive (V2)</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div id="toolbar">
+      <select name="problem" id="problem">
+        <option>1</option>
+        <option>2</option>
+      </select>
+    </div>
+    <div id="preview">
+      <canvas id="leftCanvas" width="400" height="400"></canvas>
+      <canvas id="rightCanvas" width="400" height="400"></canvas>
+    </div>
+
+    <div>
+      <textarea id="isl" title="isl" rows="16" cols="80"></textarea>
+    </div>
+    <button id="runButton">RUN</button>
+    <script src="./src/index.ts"></script>
+  </body>
+</html>
