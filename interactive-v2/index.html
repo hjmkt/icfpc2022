@@ -1,23 +1,24 @@
 <!DOCTYPE html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Interactive (V2)</title>
-    <link rel="stylesheet" href="./style.css" />
-  </head>
-  <body>
-    <div id="preview">
-      <div id="isl"></div>
-      <canvas id="leftCanvas" width="400" height="400"></canvas>
-      <canvas id="rightCanvas" width="400" height="400"></canvas>
-      <div id="canvas-overlay"></div>
-      <div id="leftCanvasText"></div>
-      <div id="rightCanvasText"></div>
-    </div>
-    <div id="contents">
-      <select name="problem" id="problem"></select>
-      <button id="runButton">RUN</button>
-    </div>
-    <script src="./src/index.ts"></script>
-  </body>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Interactive (V2)</title>
+        <link rel="stylesheet" href="./style.css" />
+    </head>
+    <body>
+        <div id="preview">
+            <div id="isl"></div>
+            <canvas id="leftCanvas" width="400" height="400"></canvas>
+            <canvas id="rightCanvas" width="400" height="400"></canvas>
+            <div id="canvas-overlay"></div>
+            <div id="costText"></div>
+            <div id="leftCanvasText"></div>
+            <div id="rightCanvasText"></div>
+        </div>
+        <div id="contents">
+            <select name="problem" id="problem"></select>
+            <button id="runButton">RUN</button>
+        </div>
+        <script src="./src/index.ts"></script>
+    </body>
 </html>

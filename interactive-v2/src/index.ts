@@ -1,27 +1,15 @@
-import {Interpreter, Painter} from "./mini-vinci";
 import * as ace from "brace";
 import "brace/theme/solarized_light";
-import {drawCanvas} from "./utils";
-import {setupOverlay} from "./canvasOverlay";
-import {calcScore, changeProblem} from "./problems";
+import { runCode } from "./utils";
+import { setupOverlay } from "./canvasOverlay";
+import { changeProblem } from "./problems";
 
 const editor = ace.edit("isl");
-editor.setTheme("ace/theme/solarized_light")
+editor.setTheme("ace/theme/solarized_light");
 
 const runButton = document.getElementById("runButton") as HTMLButtonElement;
 runButton.addEventListener("click", () => {
-    const islText  = editor.getValue();
-
-    const interpreter = new Interpreter();
-    const interpretedStructure = interpreter.run(islText);
-
-    const painter = new Painter();
-    const renderedData = painter.draw(interpretedStructure.canvas);
-
-    const canvas = document.getElementById("leftCanvas") as HTMLCanvasElement;
-    drawCanvas(canvas, renderedData);
-
-    calcScore(interpretedStructure.cost, renderedData);
+    runCode(editor.getValue());
 });
 
 const problemSelector = document.getElementById("problem") as HTMLSelectElement;
@@ -30,13 +18,14 @@ problemSelector?.addEventListener("change", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-   const numProblems = 25;
+    const numProblems = 25;
     for (let i = 1; i <= numProblems; i++) {
         const option = document.createElement("option");
         option.innerText = `${i}`;
         problemSelector.appendChild(option);
     }
     changeProblem("1");
+    runCode("");
 
     setupOverlay();
 });
