@@ -1,5 +1,5 @@
 import { BlockType, ComplexBlock, SimpleBlock } from "./Block";
-import {Canvas, CanvasSpec} from "./Canvas";
+import { Canvas, CanvasSpec } from "./Canvas";
 import {
     ColorInstruction,
     HorizontalCutInstruction,
@@ -43,9 +43,7 @@ export class Interpreter {
             throw Error(`At ${lineNumber}, encountered: ${error}!`);
         }
         let program = result.result as Program;
-        let canvas = new Canvas(
-            initSpec
-        );
+        let canvas = new Canvas(initSpec);
         this.topLevelIdCounter = initSpec.blocks.length - 1;
 
         let totalCost = 0;

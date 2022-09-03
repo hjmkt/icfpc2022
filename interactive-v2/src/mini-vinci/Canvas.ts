@@ -14,7 +14,7 @@ export interface BlockSpec {
     blockId: string;
     bottomLeft: [number, number];
     topRight: [number, number];
-    color: [number, number, number, number]
+    color: [number, number, number, number];
 }
 
 export class Canvas {
@@ -26,25 +26,29 @@ export class Canvas {
 
     blocks: Map<string, Block>;
 
-    constructor({width, height, blocks}: CanvasSpec) {
+    constructor({ width, height, blocks }: CanvasSpec) {
         this.width = width;
         this.height = height;
 
         // this.backgroundColor = backgroundColor;
         this.blocks = new Map();
-        blocks.forEach(block => {
+        blocks.forEach((block) => {
             this.blocks.set(
                 block.blockId,
                 new SimpleBlock(
                     block.blockId,
                     new Point(block.bottomLeft),
                     new Point(block.topRight),
-                    { r: block.color[0], g: block.color[1], b: block.color[2], a: block.color[3] }
+                    {
+                        r: block.color[0],
+                        g: block.color[1],
+                        b: block.color[2],
+                        a: block.color[3],
+                    }
                 )
             );
         });
     }
-
 
     get size(): Point {
         return new Point([this.width, this.height]);

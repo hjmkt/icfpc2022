@@ -1,7 +1,7 @@
-import {drawCanvas, runCode} from "./utils";
+import { drawCanvas, runCode } from "./utils";
 import { Frame, SimilarityChecker } from "./mini-vinci";
 import { RGBA } from "./mini-vinci/Color";
-import {CanvasSpec} from "./mini-vinci/Canvas";
+import { CanvasSpec } from "./mini-vinci/Canvas";
 
 let currentFrame: Frame | null = null;
 let currentSpec: CanvasSpec | null = null;
@@ -19,12 +19,14 @@ export async function changeProblem(id: string): Promise<void> {
         currentSpec = {
             width: 400,
             height: 400,
-            blocks: [{
-                blockId: "0",
-                bottomLeft: [0, 0],
-                topRight: [400, 400],
-                color: [255, 255, 255, 255]
-            }]
+            blocks: [
+                {
+                    blockId: "0",
+                    bottomLeft: [0, 0],
+                    topRight: [400, 400],
+                    color: [255, 255, 255, 255],
+                },
+            ],
         };
         return;
     }
@@ -40,12 +42,14 @@ export function getCurrentSpec(): CanvasSpec {
     return {
         width: 400,
         height: 400,
-        blocks: [{
-            blockId: "0",
-            bottomLeft: [0, 0],
-            topRight: [400, 400],
-            color: [255, 255, 255, 255]
-        }]
+        blocks: [
+            {
+                blockId: "0",
+                bottomLeft: [0, 0],
+                topRight: [400, 400],
+                color: [255, 255, 255, 255],
+            },
+        ],
     };
 }
 

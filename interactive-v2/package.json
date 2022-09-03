@@ -2,10 +2,10 @@
     "name": "interactive-v2",
     "version": "1.0.0",
     "scripts": {
+        "check": "tsc --noEmit",
         "download:problems": "node tools/downloadProblems.js",
         "format": "prettier --write \"{**/*,*}.{js,ts,md,html,css,json}\"",
-        "start": "parcel index.html",
-        "check": "tsc --noEmit"
+        "start": "parcel index.html"
     },
     "dependencies": {
         "brace": "^0.11.1",
