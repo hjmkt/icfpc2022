@@ -10,17 +10,28 @@
             <div id="isl"></div>
             <canvas id="leftCanvas" width="400" height="400"></canvas>
             <canvas id="rightCanvas" width="400" height="400"></canvas>
+            <canvas id="rightCanvasOverlay" width="400" height="400"></canvas>
             <div id="canvas-overlay"></div>
             <div id="costText"></div>
             <div id="leftCanvasText"></div>
             <div id="rightCanvasText"></div>
-            <input type="range" id="range" />
+            <input type="range" id="range" title="range" />
             <div id="timestamp">1</div>
+            <button id="overlay">overlay</button>
         </div>
         <div id="contents">
-            <select name="problem" id="problem"></select>
+            <select name="problem" id="problem" title="problem"></select>
             <button id="runButton">RUN</button>
             <button id="jsonButton">JSON</button>
+            <select name="tool" id="tool" title="tool">
+                <option>Inspect</option>
+                <option>HLine Cut</option>
+                <option>VLine Cut</option>
+                <option>Point Cut</option>
+                <option>Color</option>
+                <option>Swap</option>
+                <option>Merge</option>
+            </select>
         </div>
         <script src="./src/index.ts"></script>
     </body>

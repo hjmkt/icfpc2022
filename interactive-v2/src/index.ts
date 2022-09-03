@@ -1,7 +1,7 @@
 import * as ace from "brace";
 import "brace/theme/solarized_light";
 import { runCode, untilLine } from "./utils";
-import { setupOverlay } from "./canvasOverlay";
+import { setTool, setupOverlay } from "./canvasOverlay";
 import { changeProblem } from "./problems";
 import { parseAndDownloadIsl } from "./parser";
 
@@ -16,6 +16,20 @@ runButton.addEventListener("click", () => {
 const jsonButton = document.getElementById("jsonButton") as HTMLButtonElement;
 jsonButton.addEventListener("click", () => {
     parseAndDownloadIsl(editor.getValue());
+});
+
+const overlayButton = document.getElementById("overlay") as HTMLButtonElement;
+overlayButton.addEventListener("mousedown", () => {
+    const overlay = document.getElementById(
+        "rightCanvasOverlay"
+    ) as HTMLCanvasElement;
+    overlay.style.display = "block";
+});
+overlayButton.addEventListener("mouseup", () => {
+    const overlay = document.getElementById(
+        "rightCanvasOverlay"
+    ) as HTMLCanvasElement;
+    overlay.style.display = "none";
 });
 
 const range = document.getElementById("range") as HTMLInputElement;
@@ -34,6 +48,11 @@ problemSelector?.addEventListener("change", () => {
     });
 });
 
+const tool = document.getElementById("tool") as HTMLSelectElement;
+tool.addEventListener("change", () => {
+    setTool(tool.value);
+});
+
 document.addEventListener("DOMContentLoaded", () => {
     const numProblems = 30;
     for (let i = 1; i <= numProblems; i++) {
@@ -45,5 +64,5 @@ document.addEventListener("DOMContentLoaded", () => {
         runCode("");
     });
 
-    setupOverlay();
+    setupOverlay(editor);
 });
