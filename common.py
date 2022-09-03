@@ -71,23 +71,27 @@ class Canvas:
                 block0.y, block1.y = block1.y, block0.y
                 block0.width, block1.width = block1.width, block0.width
                 block0.height, block1.height = block1.height, block0.height
-                self.pixels[block0.y:block0.y+block0.height, block0.x:block0.x+block0.width] = block0.color
-                self.pixels[block1.y:block1.y+block1.height, block1.x:block1.x+block1.width] = block1.color
+                block0_pixels = self.pixels[block0.y:block0.y+block0.height, block0.x:block0.x+block0.width].copy()
+                block1_pixels = self.pixels[block1.y:block1.y+block1.height, block1.x:block1.x+block1.width].copy()
+                self.pixels[block0.y:block0.y+block0.height, block0.x:block0.x+block0.width] = block1_pixels
+                self.pixels[block1.y:block1.y+block1.height, block1.x:block1.x+block1.width] = block0_pixels
             case "merge":
                 block_id0 = move.options["block_id0"]
                 block_id1 = move.options["block_id1"]
+                # print("merge", block_id0, block_id1)
                 block0 = self.blocks[block_id0]
                 block1 = self.blocks[block_id1]
-                if block0.y==block1.y and max(block0.x, block1.x)-min(block0.x, block1.x)==block0.width+block1.width and block0.height==block1.height:
-                    block = SimpleBlock(min(block0.x, block1.x), block0.y, block0.width+block1.width, block0.height)
-                elif block0.x==block1.x and max(block0.y, block1.y)-min(block0.y, block1.y)==block0.height+block1.height and block0.width==block1.width:
-                    block = SimpleBlock(block0.x, min(block0.y, block1.y), block0.width, block0.height+block1.height)
+                # print(block0.x, block0.y, block0.width, block0.height)
+                # print(block1.x, block1.y, block1.width, block1.height)
+                self.global_id += 1
+                if block0.y==block1.y and max(block0.x+block0.width, block1.x+block1.width)-min(block0.x, block1.x)==block0.width+block1.width and block0.height==block1.height:
+                    block = SimpleBlock(min(block0.x, block1.x), block0.y, block0.width+block1.width, block0.height, block0.color, str(self.global_id))
+                elif block0.x==block1.x and max(block0.y+block0.height, block1.y+block1.height)-min(block0.y, block1.y)==block0.height+block1.height and block0.width==block1.width:
+                    block = SimpleBlock(block0.x, min(block0.y, block1.y), block0.width, block0.height+block1.height, block0.color, str(self.global_id))
                 else:
                     assert False, "invalid merge"
                 self.blocks.pop(block_id0)
                 self.blocks.pop(block_id1)
-                self.global_id += 1
-                block.block_id = self.global_id
                 self.blocks[block.block_id] = block
                 self.all_blocks[block.block_id] = block
 
