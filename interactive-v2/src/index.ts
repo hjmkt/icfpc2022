@@ -1,18 +1,15 @@
-import {Frame, Interpreter, Painter, SimilarityChecker} from "./mini-vinci";
+import * as ace from "brace";
+import "brace/theme/solarized_light";
+import { runCode } from "./utils";
+import { setupOverlay } from "./canvasOverlay";
+import { changeProblem } from "./problems";
 
-const runButton = document.getElementById("runButton");
-runButton?.addEventListener("click", () => {
-    const isl = document.getElementById("isl") as HTMLTextAreaElement;
-    const islText  = isl.value;
+const editor = ace.edit("isl");
+editor.setTheme("ace/theme/solarized_light");
 
-    const interpreter = new Interpreter();
-    const interpretedStructure = interpreter.run(islText);
-
-    const painter = new Painter();
-    const renderedData = painter.draw(interpretedStructure.canvas);
-
-    const canvas = document.getElementById("leftCanvas") as HTMLCanvasElement;
-    drawCanvas(canvas, renderedData);
+const runButton = document.getElementById("runButton") as HTMLButtonElement;
+runButton.addEventListener("click", () => {
+    runCode(editor.getValue());
 });
 
 const problemSelector = document.getElementById("problem") as HTMLSelectElement;
@@ -21,36 +18,14 @@ problemSelector?.addEventListener("change", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-   changeProblem("1");
-});
-
-function changeProblem(id: string): void {
-    fetch(`/${id}.json`).then(response => {
-        response.json().then(data => {
-            const rightCanvas = document.getElementById("rightCanvas") as HTMLCanvasElement;
-            drawCanvas(rightCanvas, SimilarityChecker.dataToFrame(data));
-        })
-    });
-}
-
-function drawCanvas(canvas: HTMLCanvasElement, frame: Frame): void {
-    const context = canvas.getContext("2d");
-    if (context === null) return;
-
-    const width = 400;
-    const height = 400;
-
-    const imageData = context.createImageData(width, height);
-    let idx = 0;
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            const rgba = frame[y * width + x];
-            if (!rgba) continue;
-            imageData.data[idx++] = rgba.r;
-            imageData.data[idx++] = rgba.g;
-            imageData.data[idx++] = rgba.b;
-            imageData.data[idx++] = rgba.a;
-        }
+    const numProblems = 25;
+    for (let i = 1; i <= numProblems; i++) {
+        const option = document.createElement("option");
+        option.innerText = `${i}`;
+        problemSelector.appendChild(option);
     }
-    context.putImageData(imageData, 0, 0);
-}
+    changeProblem("1");
+    runCode("");
+
+    setupOverlay();
+});
