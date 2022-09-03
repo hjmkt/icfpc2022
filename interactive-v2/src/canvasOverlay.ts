@@ -21,6 +21,7 @@ export function setTool(toolName: string) {
         case "Color":
         case "Swap":
         case "Merge":
+        case "Cont Swap":
             lineColor("red");
             break;
         default:
@@ -360,6 +361,18 @@ export function setupOverlay(editor: ace.Editor) {
                     editor.setValue(editor.getValue() + move);
                     setTool("Inspect");
                     runCode(editor.getValue());
+                }
+                break;
+            }
+            case "Cont Swap":
+            {
+                if (targetBlock === "") {
+                    targetBlock = first.id;
+                } else {
+                    const move = `swap[${targetBlock}][${first.id}]\n`;
+                    editor.setValue(editor.getValue() + move);
+                    runCode(editor.getValue());
+                    targetBlock = "";
                 }
                 break;
             }
