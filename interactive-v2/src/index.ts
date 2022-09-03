@@ -21,7 +21,13 @@ problemSelector?.addEventListener("change", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-   changeProblem("1");
+   const numProblems = 25;
+    for (let i = 1; i <= numProblems; i++) {
+        const option = document.createElement("option");
+        option.innerText = `${i}`;
+        problemSelector.appendChild(option);
+    }
+    changeProblem("1");
 });
 
 function changeProblem(id: string): void {
