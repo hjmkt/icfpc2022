@@ -44,7 +44,8 @@ export function runCode(islText: string, resetRange = true): void {
         range.min = String(0);
         range.max = String(lines);
         range.value = range.max;
-        (document.getElementById("timestamp") as HTMLDivElement).innerText = range.max;
+        (document.getElementById("timestamp") as HTMLDivElement).innerText =
+            range.max;
     }
 }
 
@@ -76,9 +77,9 @@ export function untilLine(text: string, line: number): string {
     let result = "";
     const lines = text.split(/\n/);
 
-    for (let i = 1; i <= Math.min(line, lines.length - 1); i++) {
+    for (let i = 1; i <= Math.min(line, lines.length); i++) {
         const line = lines[i - 1] as string;
-        result = result + line + "\n"
+        result = result + line + "\n";
     }
 
     return result;
