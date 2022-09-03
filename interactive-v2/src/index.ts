@@ -1,9 +1,13 @@
 import {Frame, Interpreter, Painter, SimilarityChecker} from "./mini-vinci";
+import * as ace from "brace";
+import "brace/theme/solarized_light";
+
+const editor = ace.edit("isl");
+editor.setTheme("ace/theme/solarized_light")
 
 const runButton = document.getElementById("runButton");
 runButton?.addEventListener("click", () => {
-    const isl = document.getElementById("isl") as HTMLTextAreaElement;
-    const islText  = isl.value;
+    const islText  = editor.getValue();
 
     const interpreter = new Interpreter();
     const interpretedStructure = interpreter.run(islText);
@@ -28,6 +32,8 @@ document.addEventListener("DOMContentLoaded", () => {
         problemSelector.appendChild(option);
     }
     changeProblem("1");
+
+
 });
 
 function changeProblem(id: string): void {
