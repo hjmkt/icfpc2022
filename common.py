@@ -120,13 +120,13 @@ class Canvas:
                 block_id1 = move.options["block_id1"]
                 block0 = self.blocks[block_id0]
                 block1 = self.blocks[block_id1]
-                return round(3 * self.width * self.height / (block0.width * block0.height + block1.width * block1.height))
+                return round(3 * self.width * self.height / block0.width / block0.height)
             case "merge":
                 block_id0 = move.options["block_id0"]
                 block_id1 = move.options["block_id1"]
                 block0 = self.blocks[block_id0]
                 block1 = self.blocks[block_id1]
-                return round(1 * self.width * self.height / (block0.width * block0.height + block1.width * block1.height))
+                return round(1 * self.width * self.height / max(block0.width * block0.height, block1.width * block1.height))
 
     # target: pixels of (HEIGHT, WIDTH, 3) shape
     def compute_similarity(self, target):
@@ -134,7 +134,7 @@ class Canvas:
         d = target - self.pixels
         d = d ** 2
         similarity = np.sqrt(d.sum(axis=-1)).sum()
-        return similarity * 0.005
+        return round(similarity * 0.005)
 
     def compute_score(self, target):
         return self.get_current_cost() + self.compute_similarity(target)
