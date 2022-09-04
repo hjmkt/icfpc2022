@@ -31,8 +31,11 @@ export class InterpreterResult {
 export class Interpreter {
     topLevelIdCounter: number;
 
-    constructor() {
+    isV2CostMode: boolean;
+
+    constructor(isV2CostMode: boolean) {
         this.topLevelIdCounter = 0;
+        this.isV2CostMode = isV2CostMode;
     }
 
     run(code: string, initSpec: CanvasSpec): InterpreterResult {
@@ -135,7 +138,8 @@ export class Interpreter {
         const cost = InstructionCostCalculator.getCost(
             InstructionType.ColorInstructionType,
             block.size.getScalarSize(),
-            context.size.getScalarSize()
+            context.size.getScalarSize(),
+            this.isV2CostMode
         );
         // Scoring Ends
 
@@ -187,7 +191,8 @@ export class Interpreter {
         const cost = InstructionCostCalculator.getCost(
             InstructionType.PointCutInstructionType,
             block.size.getScalarSize(),
-            context.size.getScalarSize()
+            context.size.getScalarSize(),
+            this.isV2CostMode
         );
         // Scoring Ends
 
@@ -479,7 +484,8 @@ export class Interpreter {
         const cost = InstructionCostCalculator.getCost(
             InstructionType.VerticalCutInstructionType,
             block.size.getScalarSize(),
-            context.size.getScalarSize()
+            context.size.getScalarSize(),
+            this.isV2CostMode
         );
         // Scoring Ends
 
@@ -583,7 +589,8 @@ export class Interpreter {
         const cost = InstructionCostCalculator.getCost(
             InstructionType.HorizontalCutInstructionType,
             block.size.getScalarSize(),
-            context.size.getScalarSize()
+            context.size.getScalarSize(),
+            this.isV2CostMode
         );
         // Scoring Ends
 
@@ -683,7 +690,8 @@ export class Interpreter {
         const cost = InstructionCostCalculator.getCost(
             InstructionType.SwapInstructionType,
             block1.size.getScalarSize(),
-            context.size.getScalarSize()
+            context.size.getScalarSize(),
+            this.isV2CostMode
         );
         // Scoring Ends
 
@@ -764,7 +772,8 @@ export class Interpreter {
         const cost = InstructionCostCalculator.getCost(
             InstructionType.MergeInstructionType,
             Math.max(block1.size.getScalarSize(), block2.size.getScalarSize()),
-            context.size.getScalarSize()
+            context.size.getScalarSize(),
+            this.isV2CostMode
         );
         // Scoring Ends
 

@@ -1,6 +1,6 @@
 import Konva from "konva";
 import * as ace from "brace";
-import { queryPixel } from "./problems";
+import { isV2ScoreMode, queryPixel } from "./problems";
 import { getPointerBlocks, runCode } from "./utils";
 import { ComplexBlock, SimpleBlock } from "./mini-vinci/Block";
 
@@ -246,6 +246,7 @@ export function setupOverlay(editor: ace.Editor) {
 
             if (first.typ === 0) {
                 const block = first as SimpleBlock;
+                text += `\ncolor = [${block.color.r}, ${block.color.g}, ${block.color.b}, ${block.color.a}]`;
                 // simple
                 updateTargetBlock(
                     block.bottomLeft.px,
@@ -311,7 +312,7 @@ export function setupOverlay(editor: ace.Editor) {
                     const move = `color[${targetBlock}][${r},${g},${b},${a}]\n`;
                     editor.setValue(editor.getValue() + move);
                     setTool("Inspect");
-                    runCode(editor.getValue());
+                    runCode(editor.getValue(), true, isV2ScoreMode());
                 }
                 break;
         }
@@ -332,21 +333,21 @@ export function setupOverlay(editor: ace.Editor) {
                 const move = `cut[${first.id}][y][${y}]\n`;
                 editor.setValue(editor.getValue() + move);
                 setTool("Inspect");
-                runCode(editor.getValue());
+                runCode(editor.getValue(), true, isV2ScoreMode());
                 break;
             }
             case "VLine Cut": {
                 const move = `cut[${first.id}][x][${x}]\n`;
                 editor.setValue(editor.getValue() + move);
                 setTool("Inspect");
-                runCode(editor.getValue());
+                runCode(editor.getValue(), true, isV2ScoreMode());
                 break;
             }
             case "Point Cut": {
                 const move = `cut[${first.id}][${x},${y}]\n`;
                 editor.setValue(editor.getValue() + move);
                 setTool("Inspect");
-                runCode(editor.getValue());
+                runCode(editor.getValue(), true, isV2ScoreMode());
                 break;
             }
             case "Color": {
@@ -362,7 +363,7 @@ export function setupOverlay(editor: ace.Editor) {
                     const move = `swap[${targetBlock}][${first.id}]\n`;
                     editor.setValue(editor.getValue() + move);
                     setTool("Inspect");
-                    runCode(editor.getValue());
+                    runCode(editor.getValue(), true, isV2ScoreMode());
                 }
                 break;
             }
@@ -372,7 +373,7 @@ export function setupOverlay(editor: ace.Editor) {
                 } else {
                     const move = `swap[${targetBlock}][${first.id}]\n`;
                     editor.setValue(editor.getValue() + move);
-                    runCode(editor.getValue());
+                    runCode(editor.getValue(), true, isV2ScoreMode());
                     targetBlock = "";
                 }
                 break;
@@ -384,7 +385,7 @@ export function setupOverlay(editor: ace.Editor) {
                     const move = `merge[${targetBlock}][${first.id}]\n`;
                     editor.setValue(editor.getValue() + move);
                     setTool("Inspect");
-                    runCode(editor.getValue());
+                    runCode(editor.getValue(), true, isV2ScoreMode());
                 }
                 break;
             }
