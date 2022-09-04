@@ -19,7 +19,7 @@ app.post("/api/actions/command", (req, res) => {
         const args = String(req.body.command).replace("$ISLJSON", tmpPath).split(/\s+/);
         const command = args.shift()
 
-        console.log(`running command: ${command} ${args}`);
+        console.log(`running command: ${command} ${args.join(" ")}`);
         const proc = childProcess.spawn(command, args, {cwd: path.join(__dirname, "..", "..")});
         console.log(`PID = ${proc.pid}`);
 
