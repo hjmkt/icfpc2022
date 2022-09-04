@@ -36,7 +36,7 @@ problemSelector?.addEventListener("change", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-    const numProblems = 30;
+    const numProblems = 35;
     for (let i = 1; i <= numProblems; i++) {
         const option = document.createElement("option");
         option.innerText = `${i}`;
