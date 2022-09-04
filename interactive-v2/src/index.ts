@@ -3,7 +3,10 @@ import "brace/theme/solarized_light";
 import { runCode, untilLine } from "./utils";
 import { setTool, setupOverlay } from "./canvasOverlay";
 import { changeProblem } from "./problems";
-import { parseAndDownloadIsl } from "./parser";
+import {parseAndDownloadIsl, parseIsl} from "./parser";
+import axios from "axios";
+
+const commandStorageKey = "icfpc2022-interactive-v2-command";
 
 const editor = ace.edit("isl");
 editor.setTheme("ace/theme/solarized_light");
@@ -53,6 +56,19 @@ tool.addEventListener("change", () => {
     setTool(tool.value);
 });
 
+const commandRunButton = document.getElementById("commandRun") as HTMLButtonElement;
+commandRunButton.addEventListener("click", () => {
+    const command = (document.getElementById("command") as HTMLInputElement).value;
+
+    localStorage.setItem(commandStorageKey, command);
+
+    const isl = parseIsl(editor.getValue());
+    axios.post("/api/actions/command", {
+        command,
+        isl
+    });
+});
+
 document.addEventListener("DOMContentLoaded", () => {
     const numProblems = 35;
     for (let i = 1; i <= numProblems; i++) {
@@ -65,4 +81,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     setupOverlay(editor);
+
+    const command = localStorage.getItem(commandStorageKey);
+    if (command) {
+        (document.getElementById("command") as HTMLInputElement).value = command;
+    }
 });
