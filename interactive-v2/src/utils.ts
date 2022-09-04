@@ -25,8 +25,12 @@ export function drawCanvas(canvas: HTMLCanvasElement, frame: Frame): void {
     context.putImageData(imageData, 0, 0);
 }
 
-export function runCode(islText: string, resetRange = true): void {
-    const interpreter = new Interpreter();
+export function runCode(
+    islText: string,
+    resetRange: boolean,
+    isV2CostMode: boolean
+): void {
+    const interpreter = new Interpreter(isV2CostMode);
     const interpretedStructure = interpreter.run(islText, getCurrentSpec());
 
     const painter = new Painter();

@@ -2,7 +2,7 @@ import * as ace from "brace";
 import "brace/theme/solarized_light";
 import { runCode, untilLine } from "./utils";
 import { setTool, setupOverlay } from "./canvasOverlay";
-import { changeProblem } from "./problems";
+import { changeProblem, getCurrentSpec } from "./problems";
 import { parseAndDownloadIsl, parseIsl } from "./parser";
 import axios from "axios";
 
@@ -13,7 +13,8 @@ editor.setTheme("ace/theme/solarized_light");
 
 const runButton = document.getElementById("runButton") as HTMLButtonElement;
 runButton.addEventListener("click", () => {
-    runCode(editor.getValue());
+    const spec = getCurrentSpec();
+    runCode(editor.getValue(), true, !!spec.sourcePngJSON);
 });
 
 const jsonButton = document.getElementById("jsonButton") as HTMLButtonElement;
@@ -41,13 +42,17 @@ range.addEventListener("input", () => {
         range.value;
 
     const code = untilLine(editor.getValue(), Number(range.value));
-    runCode(code, false);
+
+    const spec = getCurrentSpec();
+
+    runCode(code, false, !!spec.sourcePngJSON);
 });
 
 const problemSelector = document.getElementById("problem") as HTMLSelectElement;
 problemSelector?.addEventListener("change", () => {
     changeProblem(problemSelector.value).then(() => {
-        runCode("");
+        const spec = getCurrentSpec();
+        runCode("", true, !!spec.sourcePngJSON);
     });
 });
 
@@ -78,14 +83,15 @@ document.addEventListener("DOMContentLoaded", () => {
     ) as HTMLCanvasElement;
     overlay.style.opacity = "0%";
 
-    const numProblems = 35;
+    const numProblems = 40;
     for (let i = 1; i <= numProblems; i++) {
         const option = document.createElement("option");
         option.innerText = `${i}`;
         problemSelector.appendChild(option);
     }
     changeProblem("1").then(() => {
-        runCode("");
+        const spec = getCurrentSpec();
+        runCode("", true, !!spec.sourcePngJSON);
     });
 
     setupOverlay(editor);

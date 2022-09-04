@@ -94,7 +94,7 @@ canvas {
 
 #command {
     position: fixed;
-    top: 540px;
+    top: 550px;
     left: 10px;
     width: 500px;
     height: 22px;
@@ -103,7 +103,7 @@ canvas {
 
 #commandRun {
     position: fixed;
-    top: 540px;
+    top: 550px;
     left: 520px;
     width: 60px;
     height: 28px;
@@ -112,7 +112,7 @@ canvas {
 
 #commandInfo {
     position: fixed;
-    top: 560px;
+    top: 570px;
     left: 10px;
     font-family: monospace;
 }

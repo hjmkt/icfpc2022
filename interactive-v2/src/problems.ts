@@ -1,7 +1,7 @@
 import { drawCanvas, runCode } from "./utils";
 import { Frame, SimilarityChecker } from "./mini-vinci";
 import { RGBA } from "./mini-vinci/Color";
-import { CanvasSpec } from "./mini-vinci/Canvas";
+import { BlockSpec, CanvasSpec } from "./mini-vinci/Canvas";
 
 let currentFrame: Frame | null = null;
 let currentSpec: CanvasSpec | null = null;
@@ -28,13 +28,25 @@ export async function changeProblem(id: string): Promise<void> {
                 },
             ],
         };
+        runCode("", true, false);
         return;
     }
 
     const response2 = await fetch(`/${id}.initial.json`);
     currentSpec = await response2.json();
 
-    runCode("");
+    if (Number(id) >= 36 && currentSpec && currentSpec.sourcePngJSON) {
+        const source = await fetch(`/${id}.source.json`);
+        const sourceJson = await source.json();
+        (currentSpec.blocks[0] as BlockSpec).source = sourceJson; // 36-40前提の決めうち
+    }
+
+    runCode("", true, Number(id) >= 36);
+}
+
+export function isV2ScoreMode(): boolean {
+    const spec = getCurrentSpec();
+    return !!spec.sourcePngJSON;
 }
 
 export function getCurrentSpec(): CanvasSpec {
@@ -71,10 +83,17 @@ export function calcScore(
         return "";
     }
     const similarity = SimilarityChecker.imageDiff(currentFrame, renderedData);
-    const text =
+    let text =
         `cost = ${instructionCost}\n` +
         `similarity = ${similarity}\n` +
         `total = ${instructionCost + similarity}`;
+
+    if (isV2ScoreMode()) {
+        text += `\n(final v2 score mode)`;
+    } else {
+        text += `\n(base score mode)`;
+    }
+
     (document.getElementById("costText") as HTMLDivElement).innerText = text;
     return text;
 }
