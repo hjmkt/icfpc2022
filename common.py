@@ -2,7 +2,7 @@ import math
 import numpy as np
 
 class Canvas:
-    def __init__(self, width, height):
+    def __init__(self, width, height, alternative_cost=False):
         self.width = width
         self.height = height
         self.pixels = np.full((height, width, 4), 255)
@@ -12,6 +12,7 @@ class Canvas:
         self.global_id = 0
         self.moves = []
         self.current_cost = 0
+        self.alternative_cost = alternative_cost
 
     def exec_move(self, move):
         self.moves.append(move)
@@ -106,11 +107,13 @@ class Canvas:
             case "pcut":
                 block_id = move.options["block_id"]
                 block = self.blocks[block_id]
-                return round(10 * self.width * self.height / block.width / block.height)
+                alpha = 3 if self.alternative_cost else 10
+                return round(alpha * self.width * self.height / block.width / block.height)
             case "lcut":
                 block_id = move.options["block_id"]
                 block = self.blocks[block_id]
-                return round(7 * self.width * self.height / block.width / block.height)
+                alpha = 2 if self.alternative_cost else 7
+                return round(alpha * self.width * self.height / block.width / block.height)
             case "color":
                 block_id = move.options["block_id"]
                 block = self.blocks[block_id]

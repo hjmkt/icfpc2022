@@ -30,8 +30,10 @@ canvas = Canvas(width, height)
 canvas_for_cost = Canvas(width, height)
 global_id = 0
 
+alternative_cost = False
+
 initial_moves = []
-if args.problem>=26:
+if args.problem>=26 and args.problem<=35:
     with open(f"{args.problem}.initial.json") as f:
         initial_config = json.load(f)
         width = initial_config["width"]
@@ -89,6 +91,13 @@ if args.problem>=26:
         for move in initial_moves:
             # print(move.move_type, move.options)
             canvas.exec_move(move)
+elif args.problem>=36:
+    alternative_cost = True
+    initial_image = cv2.imread(f"./{args.problem}.initial.png", cv2.IMREAD_UNCHANGED)
+    initial_image = initial_image[::-1, :, :]
+    initial_image = cv2.cvtColor(initial_image, cv2.COLOR_BGRA2RGBA)
+    canvas.pixels = initial_image.copy()
+    canvas_for_cost.pixels = initial_image.copy()
 
 if args.resume is not None:
     resume_moves = read_json(args.resume)
@@ -121,7 +130,7 @@ if args.resume is not None:
 moves = copy.copy(initial_moves)
 
 while True:
-    (cand_rect, cand_score_diff) = find_cand_rect(canvas, target_image, args.seed, args.merge)
+    (cand_rect, cand_score_diff) = find_cand_rect(canvas, target_image, args.seed, args.merge, alternative_cost)
     print(cand_rect, cand_score_diff, file=sys.stderr)
     rect_moves = rect_to_moves(canvas, cand_rect)
     if cand_score_diff<0 and len(rect_moves)>0:
@@ -132,7 +141,7 @@ while True:
         break
     moves += rect_moves
 
-while moves[-1].move_type=="merge":
+while len(moves)>0 and moves[-1].move_type=="merge":
     moves = moves[:-1]
 
 for move in moves:
