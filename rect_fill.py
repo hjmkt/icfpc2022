@@ -6,7 +6,7 @@ import sys
 from concurrent.futures import ProcessPoolExecutor
 
 
-def compute_score_diff(canvas, target, rect):
+def compute_score_diff(canvas, target, rect, merge_cost_offset=600):
     [[x, y, width, height], [r, g, b, a]] = rect
     current_pixels = canvas.pixels[y:y+height, x:x+width]
     cand_pixels = np.zeros((height, width, 4))
@@ -15,18 +15,19 @@ def compute_score_diff(canvas, target, rect):
     current_diff = np.sqrt(((target_pixels-current_pixels)**2).sum(axis=-1)).sum() * 0.005
     cand_diff = np.sqrt(((target_pixels-cand_pixels)**2).sum(axis=-1)).sum() * 0.005
     first_rect_size = max((x+width)*(y+height), (canvas.width-x)*(y+height), (x+width)*(canvas.height-y), (canvas.width-x)*(canvas.height-y))
-    cost = round(10*0.005) + round(10 * canvas.width * canvas.height / first_rect_size)
-    cost += round(5 * canvas.width * canvas.height / width / height * 0.005)
+    cost = round(10*1) + round(10 * canvas.width * canvas.height / first_rect_size)
+    cost += round(5 * canvas.width * canvas.height / width / height)
     # merge_cost = round(1*0.005) + round(1 * canvas.width * canvas.height / first_rect_size)
-    merge_cost = cost*2 + 600 # FIXME
+    # merge_cost = cost*2 + merge_cost_offset # FIXME
+    merge_cost = cost + 100#*2 + merge_cost_offset # FIXME
     # merge_cost = 0
     score_diff = cand_diff - current_diff + cost + merge_cost
     return score_diff
 
 def refine(canvas_target_start_rect):
-    canvas, target, start_rect = canvas_target_start_rect
+    canvas, target, start_rect, merge_cost_offset = canvas_target_start_rect
     rect = start_rect
-    local_best_diff = compute_score_diff(canvas, target, rect)
+    local_best_diff = compute_score_diff(canvas, target, rect, merge_cost_offset)
     for step in [16, 4, 1]:
     # for step in [4, 1]:
         while True:
@@ -81,13 +82,13 @@ def refine(canvas_target_start_rect):
     return rect, local_best_diff
 
 
-def find_cand_rect(canvas, target, num_seeds=16):
+def find_cand_rect(canvas, target, num_seeds=64, merge_cost_offset=600):
     start_rects = [[[np.random.randint(0, canvas.width), np.random.randint(0, canvas.height), 1, 1], np.random.randint(0, 256, (4))] for _ in range(num_seeds)]
     
     best_rect = None
     best_diff = 1e8
     with ProcessPoolExecutor(8) as executor:
-        results = executor.map(refine, map(lambda x: (canvas, target, x), start_rects))
+        results = executor.map(refine, map(lambda x: (canvas, target, x, merge_cost_offset), start_rects))
     for (local_best_rect, local_best_diff) in results:
         if local_best_diff<best_diff:
             best_diff = local_best_diff
