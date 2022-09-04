@@ -33,8 +33,6 @@ canvas {
     position: fixed;
     top: 10px;
     left: 730px;
-    opacity: 75%;
-    display: none;
 }
 
 #overlay {
