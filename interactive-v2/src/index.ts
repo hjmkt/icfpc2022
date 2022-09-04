@@ -48,9 +48,19 @@ range.addEventListener("input", () => {
     runCode(code, false, !!spec.sourcePngJSON);
 });
 
+const pixelate = document.getElementById("pixelate") as HTMLSelectElement;
+pixelate.addEventListener("change", () => {
+    const factor = Number(pixelate.value);
+    changeProblem(problemSelector.value, factor).then(() => {
+        const spec = getCurrentSpec();
+        runCode("", true, !!spec.sourcePngJSON);
+    });
+});
+
 const problemSelector = document.getElementById("problem") as HTMLSelectElement;
 problemSelector?.addEventListener("change", () => {
-    changeProblem(problemSelector.value).then(() => {
+    const factor = Number(pixelate.value);
+    changeProblem(problemSelector.value, factor).then(() => {
         const spec = getCurrentSpec();
         runCode("", true, !!spec.sourcePngJSON);
     });
@@ -89,7 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
         option.innerText = `${i}`;
         problemSelector.appendChild(option);
     }
-    changeProblem("1").then(() => {
+    changeProblem("1", 1).then(() => {
         const spec = getCurrentSpec();
         runCode("", true, !!spec.sourcePngJSON);
     });

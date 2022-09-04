@@ -2,18 +2,28 @@ import { drawCanvas, runCode } from "./utils";
 import { Frame, SimilarityChecker } from "./mini-vinci";
 import { RGBA } from "./mini-vinci/Color";
 import { BlockSpec, CanvasSpec } from "./mini-vinci/Canvas";
+import { pixelate } from "./effect";
 
 let currentFrame: Frame | null = null;
 let currentSpec: CanvasSpec | null = null;
+let pixelateFrame: Frame | null = null;
+let currentPixelate = 40;
 
-export async function changeProblem(id: string): Promise<void> {
+export async function changeProblem(
+    id: string,
+    pixelateFactor: number
+): Promise<void> {
     const response = await fetch(`/${id}.json`);
     const data = await response.json();
     const rightCanvas = document.getElementById(
         "rightCanvas"
     ) as HTMLCanvasElement;
     currentFrame = SimilarityChecker.dataToFrame(data);
-    drawCanvas(rightCanvas, currentFrame);
+    currentPixelate = pixelateFactor;
+    pixelateFrame = pixelate(currentFrame, currentPixelate);
+    if (currentFrame) {
+        drawCanvas(rightCanvas, pixelateFrame);
+    }
 
     if (Number(id) <= 25) {
         currentSpec = {
@@ -66,12 +76,12 @@ export function getCurrentSpec(): CanvasSpec {
 }
 
 export function queryPixel(x: number, y: number): RGBA {
-    if (currentFrame === null) {
+    if (pixelateFrame === null) {
         return { r: 0, g: 0, b: 0, a: 0 };
     }
     x = Math.max(0, Math.min(399, Math.floor(x)));
     y = Math.max(0, Math.min(399, Math.floor(y)));
-    const item = currentFrame[y * 400 + x];
+    const item = pixelateFrame[y * 400 + x];
     return item ? item : { r: 0, g: 0, b: 0, a: 0 };
 }
 
