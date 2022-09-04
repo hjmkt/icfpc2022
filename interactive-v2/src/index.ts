@@ -26,13 +26,13 @@ overlayButton.addEventListener("mousedown", () => {
     const overlay = document.getElementById(
         "rightCanvasOverlay"
     ) as HTMLCanvasElement;
-    overlay.style.display = "block";
+    overlay.style.opacity = "75%";
 });
 overlayButton.addEventListener("mouseup", () => {
     const overlay = document.getElementById(
         "rightCanvasOverlay"
     ) as HTMLCanvasElement;
-    overlay.style.display = "none";
+    overlay.style.opacity = "0%";
 });
 
 const range = document.getElementById("range") as HTMLInputElement;
@@ -70,6 +70,11 @@ commandRunButton.addEventListener("click", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
+    const overlay = document.getElementById(
+        "rightCanvasOverlay"
+    ) as HTMLCanvasElement;
+    overlay.style.opacity = "0%";
+
     const numProblems = 35;
     for (let i = 1; i <= numProblems; i++) {
         const option = document.createElement("option");
