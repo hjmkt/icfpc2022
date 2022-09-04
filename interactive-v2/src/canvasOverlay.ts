@@ -178,7 +178,7 @@ export function setupOverlay(editor: ace.Editor) {
     rightLayer.add(rightHLine2);
 
     function updateLines(pos: { x: number; y: number }) {
-        const x = Math.max(0, Math.min(399, Math.floor(pos.x) + 1));
+        const x = Math.max(0, Math.min(399, Math.floor(pos.x) ));
         const y = Math.max(0, Math.min(399, Math.floor(pos.y) + 1));
         const vPoints = [x, 0, x, 400];
         rightVLine1.points(vPoints);
@@ -192,11 +192,12 @@ export function setupOverlay(editor: ace.Editor) {
         leftHLine2.points(hPoints);
 
         const { r, g, b, a } = queryPixel(x, y);
-        const text = `point = [${x}, ${y}], color = [${r}, ${g}, ${b}, ${a}]`;
+        const text = `point = [${x}, ${400 - y - 1}], color = [${r}, ${g}, ${b}, ${a}]`;
         (
             document.getElementById("rightCanvasText") as HTMLDivElement
         ).innerText = text;
     }
+
 
     lineColor = (color: string) => {
         rightHLine2.stroke(color);
@@ -228,8 +229,8 @@ export function setupOverlay(editor: ace.Editor) {
     }
 
     function queryPointerBlocks(pos: { x: number; y: number }) {
-        const x = Math.max(0, Math.min(399, Math.floor(pos.x) + 1));
-        const y = 400 - Math.max(0, Math.min(399, Math.floor(pos.y) + 1));
+        const x = Math.max(0, Math.min(399, Math.floor(pos.x)));
+        const y = 399 - Math.max(0, Math.min(399, Math.floor(pos.y) + 1));
 
         const blocks = getPointerBlocks(x, y);
         const first = blocks[0];
@@ -296,7 +297,7 @@ export function setupOverlay(editor: ace.Editor) {
 
     rightCanvas.on("pointerdown", () => {
         const pos = rightCanvas.getRelativePointerPosition();
-        const x = Math.max(0, Math.min(399, Math.floor(pos.x) + 1));
+        const x = Math.max(0, Math.min(399, Math.floor(pos.x)));
         const y = Math.max(0, Math.min(399, Math.floor(pos.y) + 1));
         const { r, g, b, a } = queryPixel(x, y);
         console.log(`[${x}, ${y}]`);
@@ -317,8 +318,8 @@ export function setupOverlay(editor: ace.Editor) {
 
     leftCanvas.on("pointerdown", () => {
         const pos = leftCanvas.getRelativePointerPosition();
-        const x = Math.max(0, Math.min(399, Math.floor(pos.x) + 1));
-        const y = 400 - Math.max(0, Math.min(399, Math.floor(pos.y) + 1));
+        const x = Math.max(0, Math.min(399, Math.floor(pos.x)));
+        const y = 399 - Math.max(0, Math.min(399, Math.floor(pos.y) + 1));
         const blocks = getPointerBlocks(x, y);
         const first = blocks[0];
         if (first == null) {
