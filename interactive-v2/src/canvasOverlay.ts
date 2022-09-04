@@ -23,7 +23,6 @@ export function setTool(toolName: string) {
         case "Color":
         case "Swap":
         case "Merge":
-        case "Cont Swap":
         case "CutColorMerge":
             lineColor("red");
             break;
@@ -34,6 +33,11 @@ export function setTool(toolName: string) {
     }
 
     (document.getElementById("tool") as HTMLSelectElement).value = toolName;
+}
+
+function isContMode(): boolean {
+    const check = document.getElementById("contCheck") as HTMLInputElement;
+    return Boolean(check.checked);
 }
 
 export function setupOverlay(editor: ace.Editor) {
@@ -314,7 +318,11 @@ export function setupOverlay(editor: ace.Editor) {
                     const { r, g, b, a } = queryPixel(x, y);
                     const move = `color[${targetBlock}][${r},${g},${b},${a}]\n`;
                     editor.setValue(editor.getValue() + move);
-                    setTool("Inspect");
+                    if (!isContMode()) {
+                        setTool("Inspect");
+                    } else {
+                        targetBlock = "";
+                    }
                     runCode(editor.getValue(), true, isV2ScoreMode());
                 }
                 break;
@@ -323,15 +331,31 @@ export function setupOverlay(editor: ace.Editor) {
                     const { r, g, b, a } = queryPixel(x, y);
                     const id = getCurrentGlobalId();
 
-                    const move =
-                        `cut[${targetBlock}][${targetX},${targetY}]\n` +
-                        `color[${targetBlock}.1][${r},${g},${b},${a}]\n` +
-                        `merge[${targetBlock}.0][${targetBlock}.1]\n` +
-                        `merge[${targetBlock}.2][${targetBlock}.3]\n` +
-                        `merge[${id + 1}][${id + 2}]\n`;
+                    let move = `cut[${targetBlock}][${targetX},${targetY}]\n`;
+
+                    if (
+                        targetX * 400 + (400 - targetX) * 400 <
+                        targetY * 400 + (400 - targetY)
+                    ) {
+                        move +=
+                            `color[${targetBlock}.1][${r},${g},${b},${a}]\n` +
+                            `merge[${targetBlock}.0][${targetBlock}.1]\n` +
+                            `merge[${targetBlock}.2][${targetBlock}.3]\n` +
+                            `merge[${id + 1}][${id + 2}]\n`;
+                    } else {
+                        move +=
+                            `color[${targetBlock}.1][${r},${g},${b},${a}]\n` +
+                            `merge[${targetBlock}.0][${targetBlock}.3]\n` +
+                            `merge[${targetBlock}.1][${targetBlock}.2]\n` +
+                            `merge[${id + 1}][${id + 2}]\n`;
+                    }
 
                     editor.setValue(editor.getValue() + move);
-                    setTool("Inspect");
+                    if (!isContMode()) {
+                        setTool("Inspect");
+                    } else {
+                        targetBlock = "";
+                    }
                     runCode(editor.getValue(), true, isV2ScoreMode());
                 }
                 break;
@@ -352,21 +376,21 @@ export function setupOverlay(editor: ace.Editor) {
             case "HLine Cut": {
                 const move = `cut[${first.id}][y][${y}]\n`;
                 editor.setValue(editor.getValue() + move);
-                setTool("Inspect");
+                if (!isContMode()) setTool("Inspect");
                 runCode(editor.getValue(), true, isV2ScoreMode());
                 break;
             }
             case "VLine Cut": {
                 const move = `cut[${first.id}][x][${x}]\n`;
                 editor.setValue(editor.getValue() + move);
-                setTool("Inspect");
+                if (!isContMode()) setTool("Inspect");
                 runCode(editor.getValue(), true, isV2ScoreMode());
                 break;
             }
             case "Point Cut": {
                 const move = `cut[${first.id}][${x},${y}]\n`;
                 editor.setValue(editor.getValue() + move);
-                setTool("Inspect");
+                if (!isContMode()) setTool("Inspect");
                 runCode(editor.getValue(), true, isV2ScoreMode());
                 break;
             }
@@ -382,19 +406,12 @@ export function setupOverlay(editor: ace.Editor) {
                 } else {
                     const move = `swap[${targetBlock}][${first.id}]\n`;
                     editor.setValue(editor.getValue() + move);
-                    setTool("Inspect");
+                    if (!isContMode()) {
+                        setTool("Inspect");
+                    } else {
+                        targetBlock = "";
+                    }
                     runCode(editor.getValue(), true, isV2ScoreMode());
-                }
-                break;
-            }
-            case "Cont Swap": {
-                if (targetBlock === "") {
-                    targetBlock = first.id;
-                } else {
-                    const move = `swap[${targetBlock}][${first.id}]\n`;
-                    editor.setValue(editor.getValue() + move);
-                    runCode(editor.getValue(), true, isV2ScoreMode());
-                    targetBlock = "";
                 }
                 break;
             }
@@ -404,7 +421,11 @@ export function setupOverlay(editor: ace.Editor) {
                 } else {
                     const move = `merge[${targetBlock}][${first.id}]\n`;
                     editor.setValue(editor.getValue() + move);
-                    setTool("Inspect");
+                    if (!isContMode()) {
+                        setTool("Inspect");
+                    } else {
+                        targetBlock = "";
+                    }
                     runCode(editor.getValue(), true, isV2ScoreMode());
                 }
                 break;
