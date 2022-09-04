@@ -16,7 +16,7 @@ def compute_score_diff(canvas, target, rect, merge_cost_offset=600, alternative_
     cand_diff = np.sqrt(((target_pixels-cand_pixels)**2).sum(axis=-1)).sum() * 0.005
     first_rect_size = max((x+width)*(y+height), (canvas.width-x)*(y+height), (x+width)*(canvas.height-y), (canvas.width-x)*(canvas.height-y))
     pcut_alpha = 3 if alternative_cost else 10
-    cost = round(10*1) + round(pcut_alpha * canvas.width * canvas.height / first_rect_size)
+    cost = round(pcut_alpha*1) + round(pcut_alpha * canvas.width * canvas.height / first_rect_size)
     color_alpha = 5
     cost += round(color_alpha * canvas.width * canvas.height / width / height)
     # merge_cost = round(1*0.005) + round(1 * canvas.width * canvas.height / first_rect_size)
