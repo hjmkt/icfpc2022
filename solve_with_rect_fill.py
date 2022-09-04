@@ -3,6 +3,7 @@ from util import *
 from icfpc2022_api import *
 import cv2
 import sys
+import time
 from rect_fill import *
 import argparse
 
@@ -53,6 +54,17 @@ with open(isl_path, "w") as f:
     print(isl, file=f)
 
 submission_results = get_results(args.token)
+print(submission_results, file=sys.stderr)
+retry = 0
+while retry<5 and "results" not in submission_results.keys():
+    time.sleep(1)
+    submission_results = get_results(args.token)
+    retry += 1
+
+if retry>=5:
+    print("unexpected exit", file=sys.stderr)
+    exit()
+
 submission_results = submission_results["results"]
 submission_results = list(filter(lambda x: x["problem_id"]==args.problem, submission_results))
 if len(submission_results)>0:
@@ -60,6 +72,8 @@ if len(submission_results)>0:
     if score<min_score:
         print(f"post submission with score = {score}, updated from {min_score}", file=sys.stderr)
         post_submission(args.problem, isl_path, args.token)
+    else:
+        print(f"score = {score} (min = {min_score})", file=sys.stderr)
 else:
     print(f"post submission with score = {score}", file=sys.stderr)
     post_submission(args.problem, isl_path, args.token)
