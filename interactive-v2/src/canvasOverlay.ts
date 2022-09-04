@@ -23,7 +23,10 @@ export function setTool(toolName: string) {
         case "Color":
         case "Swap":
         case "Merge":
-        case "CutColorMerge":
+        case "CCM(左下)":
+        case "CCM(右下)":
+        case "CCM(右上)":
+        case "CCM(左上)":
             lineColor("red");
             break;
         default:
@@ -312,6 +315,38 @@ export function setupOverlay(editor: ace.Editor) {
         console.log(`[${x}, ${y}]`);
         console.log(`[${r}, ${g}, ${b}, ${a}]`);
 
+        const ccmCommon = (part: number) => {
+            const { r, g, b, a } = queryPixel(x, y);
+            const id = getCurrentGlobalId();
+
+            let move = `cut[${targetBlock}][${targetX},${targetY}]\n`;
+
+            if (
+                targetX * 400 + (400 - targetX) * 400 <
+                targetY * 400 + (400 - targetY)
+            ) {
+                move +=
+                    `color[${targetBlock}.${part}][${r},${g},${b},${a}]\n` +
+                    `merge[${targetBlock}.0][${targetBlock}.1]\n` +
+                    `merge[${targetBlock}.2][${targetBlock}.3]\n` +
+                    `merge[${id + 1}][${id + 2}]\n`;
+            } else {
+                move +=
+                    `color[${targetBlock}.${part}][${r},${g},${b},${a}]\n` +
+                    `merge[${targetBlock}.0][${targetBlock}.3]\n` +
+                    `merge[${targetBlock}.1][${targetBlock}.2]\n` +
+                    `merge[${id + 1}][${id + 2}]\n`;
+            }
+
+            editor.setValue(editor.getValue() + move);
+            if (!isContMode()) {
+                setTool("Inspect");
+            } else {
+                targetBlock = "";
+            }
+            runCode(editor.getValue(), true, isV2ScoreMode());
+        };
+
         switch (curTool) {
             case "Color":
                 if (targetBlock !== "") {
@@ -326,37 +361,24 @@ export function setupOverlay(editor: ace.Editor) {
                     runCode(editor.getValue(), true, isV2ScoreMode());
                 }
                 break;
-            case "CutColorMerge":
+            case "CCM(左下)":
                 if (targetBlock !== "") {
-                    const { r, g, b, a } = queryPixel(x, y);
-                    const id = getCurrentGlobalId();
-
-                    let move = `cut[${targetBlock}][${targetX},${targetY}]\n`;
-
-                    if (
-                        targetX * 400 + (400 - targetX) * 400 <
-                        targetY * 400 + (400 - targetY)
-                    ) {
-                        move +=
-                            `color[${targetBlock}.1][${r},${g},${b},${a}]\n` +
-                            `merge[${targetBlock}.0][${targetBlock}.1]\n` +
-                            `merge[${targetBlock}.2][${targetBlock}.3]\n` +
-                            `merge[${id + 1}][${id + 2}]\n`;
-                    } else {
-                        move +=
-                            `color[${targetBlock}.1][${r},${g},${b},${a}]\n` +
-                            `merge[${targetBlock}.0][${targetBlock}.3]\n` +
-                            `merge[${targetBlock}.1][${targetBlock}.2]\n` +
-                            `merge[${id + 1}][${id + 2}]\n`;
-                    }
-
-                    editor.setValue(editor.getValue() + move);
-                    if (!isContMode()) {
-                        setTool("Inspect");
-                    } else {
-                        targetBlock = "";
-                    }
-                    runCode(editor.getValue(), true, isV2ScoreMode());
+                    ccmCommon(0);
+                }
+                break;
+            case "CCM(右下)":
+                if (targetBlock !== "") {
+                    ccmCommon(1);
+                }
+                break;
+            case "CCM(右上)":
+                if (targetBlock !== "") {
+                    ccmCommon(2);
+                }
+                break;
+            case "CCM(左上)":
+                if (targetBlock !== "") {
+                    ccmCommon(3);
                 }
                 break;
         }
@@ -430,7 +452,10 @@ export function setupOverlay(editor: ace.Editor) {
                 }
                 break;
             }
-            case "CutColorMerge": {
+            case "CCM(左下)":
+            case "CCM(右下)":
+            case "CCM(右上)":
+            case "CCM(左上)": {
                 if (targetBlock === "") {
                     targetBlock = first.id;
                     targetX = x;
