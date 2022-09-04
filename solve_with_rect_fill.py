@@ -1,5 +1,6 @@
 from common import *
 from util import *
+from icfpc2022_api import *
 import cv2
 import sys
 from rect_fill import *
@@ -9,6 +10,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-p", "--problem", type=int)
 parser.add_argument("-s", "--seed", type=int)
 parser.add_argument("-m", "--merge", type=int)
+parser.add_argument("-t", "--token", type=str)
 args = parser.parse_args()
 
 canvas = Canvas(400, 400)
@@ -33,19 +35,29 @@ while True:
 while moves[-1].move_type=="merge":
     moves = moves[:-1]
 
-# for move in moves:
-    # canvas.exec_move(move)
+canvas_for_cost = Canvas(400, 400)
+for move in moves:
+    canvas_for_cost.exec_move(move)
+cost = canvas_for_cost.get_current_cost()
+similarity = canvas_for_cost.compute_similarity(target_image)
+score = canvas_for_cost.compute_score(target_image)
 
-cost = canvas.get_current_cost()
-similarity = canvas.compute_similarity(target_image)
-score = canvas.compute_score(target_image)
 print(f"cost = {cost}", file=sys.stderr)
 print(f"similarity = {similarity}", file=sys.stderr)
 print(f"score = {score}", file=sys.stderr)
-# cv2.imshow("post", cv2.cvtColor(canvas.pixels.astype(np.uint8)[::-1, :, :], cv2.COLOR_BGRA2RGBA))
-cv2.imwrite("post.png", cv2.cvtColor(canvas.pixels.astype(np.uint8)[::-1, :, :], cv2.COLOR_BGRA2RGBA))
-# cv2.waitKey(0)
+
+# cv2.imwrite("post.png", cv2.cvtColor(canvas.pixels.astype(np.uint8)[::-1, :, :], cv2.COLOR_BGRA2RGBA))
 isl = moves_to_isl(moves)
 with open(f"./isl_p{args.problem}_{round(score)}.txt", "w") as f:
     print(isl, file=f)
-# print(isl)
+
+submission_results = get_results(args.token)["results"]
+submission_results = list(filter(lambda x: x["problem_id"]==f"{args.problem}", submission_results))
+if len(submission_results)>0:
+    min_score = submission_results[0]["min_cost"]
+    if score<min_score:
+        print(f"post submission with score = {score}, updated from {min_score}", file=sys.stderr)
+        post_submission(args.problem, args.token)
+else:
+    print(f"post submission with score = {score}", file=sys.stderr)
+    post_submission(args.problem, args.token)
