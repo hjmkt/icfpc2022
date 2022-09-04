@@ -40,6 +40,11 @@ if args.problem>=26:
             block_height = 40
             rows = 10
             cols = 10
+        elif num_blocks==256:
+            block_width = 25
+            block_height = 25
+            rows = 16
+            cols = 16
         elif num_blocks==400:
             block_width = 20
             block_height = 20
