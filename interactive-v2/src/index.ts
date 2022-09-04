@@ -1,7 +1,7 @@
 import * as ace from "brace";
 import "brace/theme/solarized_light";
-import {runCode, untilLine} from "./utils";
-import { setupOverlay } from "./canvasOverlay";
+import { runCode, untilLine } from "./utils";
+import { setTool, setupOverlay } from "./canvasOverlay";
 import { changeProblem } from "./problems";
 import { parseAndDownloadIsl } from "./parser";
 
@@ -18,15 +18,28 @@ jsonButton.addEventListener("click", () => {
     parseAndDownloadIsl(editor.getValue());
 });
 
+const overlayButton = document.getElementById("overlay") as HTMLButtonElement;
+overlayButton.addEventListener("mousedown", () => {
+    const overlay = document.getElementById(
+        "rightCanvasOverlay"
+    ) as HTMLCanvasElement;
+    overlay.style.display = "block";
+});
+overlayButton.addEventListener("mouseup", () => {
+    const overlay = document.getElementById(
+        "rightCanvasOverlay"
+    ) as HTMLCanvasElement;
+    overlay.style.display = "none";
+});
+
 const range = document.getElementById("range") as HTMLInputElement;
 range.addEventListener("input", () => {
-    (document.getElementById("timestamp") as HTMLDivElement).innerText = range.value;
+    (document.getElementById("timestamp") as HTMLDivElement).innerText =
+        range.value;
 
     const code = untilLine(editor.getValue(), Number(range.value));
     runCode(code, false);
 });
-
-
 
 const problemSelector = document.getElementById("problem") as HTMLSelectElement;
 problemSelector?.addEventListener("change", () => {
@@ -35,8 +48,13 @@ problemSelector?.addEventListener("change", () => {
     });
 });
 
+const tool = document.getElementById("tool") as HTMLSelectElement;
+tool.addEventListener("change", () => {
+    setTool(tool.value);
+});
+
 document.addEventListener("DOMContentLoaded", () => {
-    const numProblems = 30;
+    const numProblems = 35;
     for (let i = 1; i <= numProblems; i++) {
         const option = document.createElement("option");
         option.innerText = `${i}`;
@@ -46,5 +64,5 @@ document.addEventListener("DOMContentLoaded", () => {
         runCode("");
     });
 
-    setupOverlay();
+    setupOverlay(editor);
 });

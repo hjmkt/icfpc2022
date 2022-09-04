@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const axios = require("axios");
-const maxProblems = 30;
+const maxProblems = 35;
 
 async function main() {
     for (let i = 1; i <= maxProblems; i++) {

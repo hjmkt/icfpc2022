@@ -1,12 +1,39 @@
 import Konva from "konva";
+import * as ace from "brace";
 import { queryPixel } from "./problems";
-import { getPointerBlocks } from "./utils";
+import { getPointerBlocks, runCode } from "./utils";
 import { ComplexBlock, SimpleBlock } from "./mini-vinci/Block";
 
 const width = 812;
 const height = 802;
 
-export function setupOverlay() {
+let lineColor: (color: string) => void;
+let curTool = "Inspect";
+let targetBlock = "";
+
+export function setTool(toolName: string) {
+    curTool = toolName;
+    targetBlock = "";
+    switch (toolName) {
+        case "HLine Cut":
+        case "VLine Cut":
+        case "Point Cut":
+        case "Color":
+        case "Swap":
+        case "Merge":
+        case "Cont Swap":
+            lineColor("red");
+            break;
+        default:
+            lineColor("gray");
+            toolName = "Inspect";
+            break;
+    }
+
+    (document.getElementById("tool") as HTMLSelectElement).value = toolName;
+}
+
+export function setupOverlay(editor: ace.Editor) {
     const stage = new Konva.Stage({
         container: "canvas-overlay",
         width: width,
@@ -171,6 +198,35 @@ export function setupOverlay() {
         ).innerText = text;
     }
 
+    lineColor = (color: string) => {
+        rightHLine2.stroke(color);
+        leftHLine2.stroke(color);
+        rightVLine2.stroke(color);
+        leftVLine2.stroke(color);
+    };
+
+    function lineVisible(visible: boolean) {
+        if (visible) {
+            rightVLine1.show();
+            rightVLine2.show();
+            leftVLine1.show();
+            leftVLine2.show();
+            rightHLine1.show();
+            rightHLine2.show();
+            leftHLine1.show();
+            leftHLine2.show();
+        } else {
+            rightVLine1.hide();
+            rightVLine2.hide();
+            leftVLine1.hide();
+            leftVLine2.hide();
+            rightHLine1.hide();
+            rightHLine2.hide();
+            leftHLine1.hide();
+            leftHLine2.hide();
+        }
+    }
+
     function queryPointerBlocks(pos: { x: number; y: number }) {
         const x = Math.max(0, Math.min(399, Math.floor(pos.x) + 1));
         const y = 400 - Math.max(0, Math.min(399, Math.floor(pos.y) + 1));
@@ -226,6 +282,16 @@ export function setupOverlay() {
 
     leftCanvas.on("pointerleave", () => {
         inspectLayer.hide();
+        lineVisible(false);
+    });
+    leftCanvas.on("pointerenter", () => {
+        lineVisible(true);
+    });
+    rightCanvas.on("pointerleave", () => {
+        lineVisible(false);
+    });
+    rightCanvas.on("pointerenter", () => {
+        lineVisible(true);
     });
 
     rightCanvas.on("pointerdown", () => {
@@ -235,6 +301,18 @@ export function setupOverlay() {
         const { r, g, b, a } = queryPixel(x, y);
         console.log(`[${x}, ${y}]`);
         console.log(`[${r}, ${g}, ${b}, ${a}]`);
+
+        switch (curTool) {
+            case "Color":
+                if (targetBlock !== "") {
+                    const { r, g, b, a } = queryPixel(x, y);
+                    const move = `color[${targetBlock}][${r},${g},${b},${a}]\n`;
+                    editor.setValue(editor.getValue() + move);
+                    setTool("Inspect");
+                    runCode(editor.getValue());
+                }
+                break;
+        }
     });
 
     leftCanvas.on("pointerdown", () => {
@@ -243,8 +321,75 @@ export function setupOverlay() {
         const y = 400 - Math.max(0, Math.min(399, Math.floor(pos.y) + 1));
         const blocks = getPointerBlocks(x, y);
         const first = blocks[0];
-        if (first) {
-            console.log(first.id);
+        if (first == null) {
+            return;
+        }
+
+        switch (curTool) {
+            case "HLine Cut": {
+                const move = `cut[${first.id}][y][${y}]\n`;
+                editor.setValue(editor.getValue() + move);
+                setTool("Inspect");
+                runCode(editor.getValue());
+                break;
+            }
+            case "VLine Cut": {
+                const move = `cut[${first.id}][x][${x}]\n`;
+                editor.setValue(editor.getValue() + move);
+                setTool("Inspect");
+                runCode(editor.getValue());
+                break;
+            }
+            case "Point Cut": {
+                const move = `cut[${first.id}][${x},${y}]\n`;
+                editor.setValue(editor.getValue() + move);
+                setTool("Inspect");
+                runCode(editor.getValue());
+                break;
+            }
+            case "Color": {
+                if (targetBlock === "") {
+                    targetBlock = first.id;
+                }
+                break;
+            }
+            case "Swap": {
+                if (targetBlock === "") {
+                    targetBlock = first.id;
+                } else {
+                    const move = `swap[${targetBlock}][${first.id}]\n`;
+                    editor.setValue(editor.getValue() + move);
+                    setTool("Inspect");
+                    runCode(editor.getValue());
+                }
+                break;
+            }
+            case "Cont Swap":
+            {
+                if (targetBlock === "") {
+                    targetBlock = first.id;
+                } else {
+                    const move = `swap[${targetBlock}][${first.id}]\n`;
+                    editor.setValue(editor.getValue() + move);
+                    runCode(editor.getValue());
+                    targetBlock = "";
+                }
+                break;
+            }
+            case "Merge": {
+                if (targetBlock === "") {
+                    targetBlock = first.id;
+                } else {
+                    const move = `merge[${targetBlock}][${first.id}]\n`;
+                    editor.setValue(editor.getValue() + move);
+                    setTool("Inspect");
+                    runCode(editor.getValue());
+                }
+                break;
+            }
+            default:
+                console.log(first.id);
+                return;
         }
     });
 
