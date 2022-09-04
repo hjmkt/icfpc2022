@@ -31,4 +31,5 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--token", type=str)
     args = parser.parse_args()
-    pprint.pprint(get_results(args.token))
+    results = get_results(args.token)
+    pprint.pprint(results)

@@ -48,16 +48,18 @@ print(f"score = {score}", file=sys.stderr)
 
 # cv2.imwrite("post.png", cv2.cvtColor(canvas.pixels.astype(np.uint8)[::-1, :, :], cv2.COLOR_BGRA2RGBA))
 isl = moves_to_isl(moves)
-with open(f"./isl_p{args.problem}_{round(score)}.txt", "w") as f:
+isl_path = f"./isl_p{args.problem}_{round(score)}.txt"
+with open(isl_path, "w") as f:
     print(isl, file=f)
 
-submission_results = get_results(args.token)["results"]
-submission_results = list(filter(lambda x: x["problem_id"]==f"{args.problem}", submission_results))
+submission_results = get_results(args.token)
+submission_results = submission_results["results"]
+submission_results = list(filter(lambda x: x["problem_id"]==args.problem, submission_results))
 if len(submission_results)>0:
     min_score = submission_results[0]["min_cost"]
     if score<min_score:
         print(f"post submission with score = {score}, updated from {min_score}", file=sys.stderr)
-        post_submission(args.problem, args.token)
+        post_submission(args.problem, isl_path, args.token)
 else:
     print(f"post submission with score = {score}", file=sys.stderr)
-    post_submission(args.problem, args.token)
+    post_submission(args.problem, isl_path, args.token)
