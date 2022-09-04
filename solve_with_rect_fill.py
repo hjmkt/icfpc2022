@@ -7,6 +7,7 @@ import time
 import copy
 import json
 from rect_fill import *
+from isl_json_reader import *
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -14,6 +15,7 @@ parser.add_argument("-p", "--problem", type=int)
 parser.add_argument("-s", "--seed", type=int)
 parser.add_argument("-m", "--merge", type=int)
 parser.add_argument("-t", "--token", type=str)
+parser.add_argument("-r", "--resume", type=str)
 args = parser.parse_args()
 
 width = 400
@@ -88,7 +90,36 @@ if args.problem>=26:
             # print(move.move_type, move.options)
             canvas.exec_move(move)
 
+if args.resume is not None:
+    resume_moves = read_json(args.resume)
+    for move in resume_moves:
+        canvas.exec_move(move)
+    merge_moves = []
+    while len(canvas.blocks.keys())>1:
+        block_ids = list(canvas.blocks.keys())
+        merged = False
+        for i in range(len(block_ids)-1):
+            for j in range(i+1, len(block_ids)):
+                block0 = canvas.blocks[block_ids[i]]
+                block1 = canvas.blocks[block_ids[j]]
+                if block0.y==block1.y and max(block0.x+block0.width, block1.x+block1.width)-min(block0.x, block1.x)==block0.width+block1.width and block0.height==block1.height:
+                    move = Move("merge", {"block_id0": block0.block_id, "block_id1": block1.block_id})
+                    merge_moves.append(move)
+                    canvas.exec_move(move)
+                    merged = True
+                    break
+                elif block0.x==block1.x and max(block0.y+block0.height, block1.y+block1.height)-min(block0.y, block1.y)==block0.height+block1.height and block0.width==block1.width:
+                    move = Move("merge", {"block_id0": block0.block_id, "block_id1": block1.block_id})
+                    merge_moves.append(move)
+                    canvas.exec_move(move)
+                    merged = True
+                    break
+            if merged:
+                break
+    initial_moves = resume_moves + merge_moves
+
 moves = copy.copy(initial_moves)
+
 while True:
     (cand_rect, cand_score_diff) = find_cand_rect(canvas, target_image, args.seed, args.merge)
     print(cand_rect, cand_score_diff, file=sys.stderr)
