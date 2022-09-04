@@ -66,7 +66,7 @@ def cost_calc_fin(x,y,width,height):
         if x+width==400:
             if y==0:
                 if y+height==400:
-                    return 5
+                    return 5,-1,-1,-1
                 else:
                     cut_cost=7
                     color_cost=round(5*400*400/(width*height))
