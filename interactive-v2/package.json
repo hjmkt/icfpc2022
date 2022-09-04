@@ -3,10 +3,10 @@
     "version": "1.0.0",
     "scripts": {
         "check": "tsc --noEmit",
+        "dev": "parcel index.html",
         "download:problems": "node tools/downloadProblems.js",
         "format": "prettier --write \"{**/*,*}.{js,ts,md,html,css,json}\"",
-        "start": "parcel build index.html && node server/main.js",
-        "dev": "parcel index.html"
+        "start": "parcel build index.html && node server/main.js"
     },
     "dependencies": {
         "brace": "^0.11.1",
