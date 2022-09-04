@@ -2,7 +2,7 @@ import { Parser } from "./mini-vinci/Parser";
 import { Program } from "./mini-vinci/Program";
 import { InstructionType } from "./mini-vinci/Instruction";
 
-export function parseAndDownloadIsl(code: string): void {
+export function parseIsl(code: string): any {
     const parser = new Parser();
     const program = parser.parse(code).result as Program;
 
@@ -71,6 +71,11 @@ export function parseAndDownloadIsl(code: string): void {
         }
     });
 
+    return result;
+}
+
+export function parseAndDownloadIsl(code: string): void {
+    const result = parseIsl(code);
     const json = JSON.stringify(result, null, 4);
     const blob = new Blob([json], { type: "application/json" });
 

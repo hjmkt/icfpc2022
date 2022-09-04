@@ -93,3 +93,28 @@ canvas {
     left: 320px;
     font-family: monospace;
 }
+
+#command {
+    position: fixed;
+    top: 540px;
+    left: 10px;
+    width: 500px;
+    height: 22px;
+    font-family: monospace;
+}
+
+#commandRun {
+    position: fixed;
+    top: 540px;
+    left: 520px;
+    width: 60px;
+    height: 28px;
+    font-family: monospace;
+}
+
+#commandInfo {
+    position: fixed;
+    top: 560px;
+    left: 10px;
+    font-family: monospace;
+}
