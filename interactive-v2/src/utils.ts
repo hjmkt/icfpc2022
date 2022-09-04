@@ -2,6 +2,11 @@ import { Block, Frame, Interpreter, Painter, VinciCanvas } from "./mini-vinci";
 import { calcScore, getCurrentSpec } from "./problems";
 
 let currentCanvas: VinciCanvas | null = null;
+let currentGlobalId = 0;
+
+export function getCurrentGlobalId(): number {
+    return currentGlobalId;
+}
 
 export function drawCanvas(canvas: HTMLCanvasElement, frame: Frame): void {
     const context = canvas.getContext("2d");
@@ -32,6 +37,7 @@ export function runCode(
 ): void {
     const interpreter = new Interpreter(isV2CostMode);
     const interpretedStructure = interpreter.run(islText, getCurrentSpec());
+    currentGlobalId = interpreter.topLevelIdCounter;
 
     const painter = new Painter();
     currentCanvas = interpretedStructure.canvas;

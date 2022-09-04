@@ -1,7 +1,7 @@
 import Konva from "konva";
 import * as ace from "brace";
 import { isV2ScoreMode, queryPixel } from "./problems";
-import { getPointerBlocks, runCode } from "./utils";
+import { getCurrentGlobalId, getPointerBlocks, runCode } from "./utils";
 import { ComplexBlock, SimpleBlock } from "./mini-vinci/Block";
 
 const width = 812;
@@ -10,6 +10,8 @@ const height = 802;
 let lineColor: (color: string) => void;
 let curTool = "Inspect";
 let targetBlock = "";
+let targetX = 0;
+let targetY = 0;
 
 export function setTool(toolName: string) {
     curTool = toolName;
@@ -22,6 +24,7 @@ export function setTool(toolName: string) {
         case "Swap":
         case "Merge":
         case "Cont Swap":
+        case "CutColorMerge":
             lineColor("red");
             break;
         default:
@@ -315,6 +318,23 @@ export function setupOverlay(editor: ace.Editor) {
                     runCode(editor.getValue(), true, isV2ScoreMode());
                 }
                 break;
+            case "CutColorMerge":
+                if (targetBlock !== "") {
+                    const { r, g, b, a } = queryPixel(x, y);
+                    const id = getCurrentGlobalId();
+
+                    const move =
+                        `cut[${targetBlock}][${targetX},${targetY}]\n` +
+                        `color[${targetBlock}.1][${r},${g},${b},${a}]\n` +
+                        `merge[${targetBlock}.0][${targetBlock}.1]\n` +
+                        `merge[${targetBlock}.2][${targetBlock}.3]\n` +
+                        `merge[${id + 1}][${id + 2}]\n`;
+
+                    editor.setValue(editor.getValue() + move);
+                    setTool("Inspect");
+                    runCode(editor.getValue(), true, isV2ScoreMode());
+                }
+                break;
         }
     });
 
@@ -386,6 +406,14 @@ export function setupOverlay(editor: ace.Editor) {
                     editor.setValue(editor.getValue() + move);
                     setTool("Inspect");
                     runCode(editor.getValue(), true, isV2ScoreMode());
+                }
+                break;
+            }
+            case "CutColorMerge": {
+                if (targetBlock === "") {
+                    targetBlock = first.id;
+                    targetX = x;
+                    targetY = y;
                 }
                 break;
             }
