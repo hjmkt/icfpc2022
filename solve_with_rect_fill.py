@@ -136,7 +136,7 @@ submission_results = submission_results["results"]
 submission_results = list(filter(lambda x: x["problem_id"]==args.problem, submission_results))
 if len(submission_results)>0:
     min_score = submission_results[0]["min_cost"]
-    if score<min_score || min_score==0:
+    if score<min_score or min_score==0:
         print(f"post submission with score = {score}, updated from {min_score}", file=sys.stderr)
         post_submission(args.problem, isl_path, args.token)
     else:
