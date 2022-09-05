@@ -1,7 +1,12 @@
 import Konva from "konva";
 import * as ace from "brace";
 import { isV2ScoreMode, queryPixel } from "./problems";
-import { getCurrentGlobalId, getPointerBlocks, runCode } from "./utils";
+import {
+    getCurrentGlobalId,
+    getPointerBlocks,
+    queryLeftCanvasPixel,
+    runCode,
+} from "./utils";
 import { ComplexBlock, SimpleBlock } from "./mini-vinci/Block";
 
 const width = 812;
@@ -12,10 +17,18 @@ let curTool = "Inspect";
 let targetBlock = "";
 let targetX = 0;
 let targetY = 0;
+let targetX2 = -1;
+let targetY2 = -1;
+let prevR = 0;
+let prevG = 0;
+let prevB = 0;
+let prevA = 0;
 
 export function setTool(toolName: string) {
     curTool = toolName;
     targetBlock = "";
+    targetX2 = -1;
+    targetY2 = -1;
     switch (toolName) {
         case "HLine Cut":
         case "VLine Cut":
@@ -27,6 +40,7 @@ export function setTool(toolName: string) {
         case "CCM(右下)":
         case "CCM(右上)":
         case "CCM(左上)":
+        case "矩形":
             lineColor("red");
             break;
         default:
@@ -319,24 +333,12 @@ export function setupOverlay(editor: ace.Editor) {
             const { r, g, b, a } = queryPixel(x, y);
             const id = getCurrentGlobalId();
 
-            let move = `cut[${targetBlock}][${targetX},${targetY}]\n`;
-
-            if (
-                targetX * 400 + (400 - targetX) * 400 <
-                targetY * 400 + (400 - targetY)
-            ) {
-                move +=
-                    `color[${targetBlock}.${part}][${r},${g},${b},${a}]\n` +
-                    `merge[${targetBlock}.0][${targetBlock}.1]\n` +
-                    `merge[${targetBlock}.2][${targetBlock}.3]\n` +
-                    `merge[${id + 1}][${id + 2}]\n`;
-            } else {
-                move +=
-                    `color[${targetBlock}.${part}][${r},${g},${b},${a}]\n` +
-                    `merge[${targetBlock}.0][${targetBlock}.3]\n` +
-                    `merge[${targetBlock}.1][${targetBlock}.2]\n` +
-                    `merge[${id + 1}][${id + 2}]\n`;
-            }
+            let move =
+                `cut[${targetBlock}][${targetX},${targetY}]\n` +
+                `color[${targetBlock}.${part}][${r},${g},${b},${a}]\n` +
+                `merge[${targetBlock}.0][${targetBlock}.3]\n` +
+                `merge[${targetBlock}.1][${targetBlock}.2]\n` +
+                `merge[${id + 1}][${id + 2}]\n`;
 
             editor.setValue(editor.getValue() + move);
             if (!isContMode()) {
@@ -357,6 +359,36 @@ export function setupOverlay(editor: ace.Editor) {
                         setTool("Inspect");
                     } else {
                         targetBlock = "";
+                    }
+                    runCode(editor.getValue(), true, isV2ScoreMode());
+                }
+                break;
+            case "矩形":
+                if (targetBlock !== "" && targetY2 >= 0 && targetX2 >= 0) {
+                    const { r, g, b, a } = queryPixel(x, y);
+                    const id = getCurrentGlobalId();
+
+                    let move =
+                        `cut[${targetBlock}][${targetX},${targetY}]\n` +
+                        `color[${targetBlock}.1][${r},${g},${b},${a}]\n` +
+                        `cut[${targetBlock}.1][${targetX2},${targetY2}]\n` +
+                        `color[${targetBlock}.1.0][${prevR},${prevG},${prevB},${prevA}]\n` +
+                        `color[${targetBlock}.1.1][${prevR},${prevG},${prevB},${prevA}]\n` +
+                        `color[${targetBlock}.1.2][${prevR},${prevG},${prevB},${prevA}]\n` +
+                        `merge[${targetBlock}.1.0][${targetBlock}.1.3]\n` +
+                        `merge[${targetBlock}.1.1][${targetBlock}.1.2]\n` +
+                        `merge[${id + 1}][${id + 2}]\n` +
+                        `merge[${targetBlock}.0][${targetBlock}.3]\n` +
+                        `merge[${id + 3}][${targetBlock}.2]\n` +
+                        `merge[${id + 4}][${id + 5}]\n`;
+
+                    editor.setValue(editor.getValue() + move);
+                    if (!isContMode()) {
+                        setTool("Inspect");
+                    } else {
+                        targetBlock = "";
+                        targetX2 = -1;
+                        targetY2 = -1;
                     }
                     runCode(editor.getValue(), true, isV2ScoreMode());
                 }
@@ -463,6 +495,21 @@ export function setupOverlay(editor: ace.Editor) {
                 }
                 break;
             }
+            case "矩形":
+                if (targetBlock === "") {
+                    targetBlock = first.id;
+                    targetX = x;
+                    targetY = y;
+                } else if (targetX2 < 0 && targetY2 < 0) {
+                    targetX2 = x;
+                    targetY2 = y;
+                    let { r, g, b, a } = queryLeftCanvasPixel(x, y);
+                    prevR = r;
+                    prevG = g;
+                    prevB = b;
+                    prevA = a;
+                }
+                break;
             default:
                 console.log(first.id);
                 return;

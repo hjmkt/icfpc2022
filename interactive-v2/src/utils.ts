@@ -1,7 +1,9 @@
 import { Block, Frame, Interpreter, Painter, VinciCanvas } from "./mini-vinci";
 import { calcScore, getCurrentSpec } from "./problems";
+import { RGBA } from "./mini-vinci/Color";
 
 let currentCanvas: VinciCanvas | null = null;
+let currentFrame: Frame | null = null;
 let currentGlobalId = 0;
 
 export function getCurrentGlobalId(): number {
@@ -42,6 +44,7 @@ export function runCode(
     const painter = new Painter();
     currentCanvas = interpretedStructure.canvas;
     const renderedData = painter.draw(interpretedStructure.canvas);
+    currentFrame = renderedData;
 
     const canvas = document.getElementById("leftCanvas") as HTMLCanvasElement;
     drawCanvas(canvas, renderedData);
@@ -98,4 +101,14 @@ export function untilLine(text: string, line: number): string {
     }
 
     return result;
+}
+
+export function queryLeftCanvasPixel(x: number, y: number): RGBA {
+    if (currentFrame === null) {
+        return { r: 0, g: 0, b: 0, a: 0 };
+    }
+    x = Math.max(0, Math.min(399, Math.floor(x)));
+    y = Math.max(0, Math.min(399, Math.floor(y)));
+    const item = currentFrame[y * 400 + x];
+    return item ? item : { r: 0, g: 0, b: 0, a: 0 };
 }
