@@ -7,7 +7,6 @@ import {
     queryLeftCanvasPixel,
     runCode,
 } from "./utils";
-import { ComplexBlock, SimpleBlock } from "./mini-vinci/Block";
 
 const width = 812;
 const height = 802;
@@ -258,6 +257,15 @@ export function setupOverlay(editor: ace.Editor) {
         const x = Math.max(0, Math.min(399, Math.floor(pos.x)));
         const y = 399 - Math.max(0, Math.min(399, Math.floor(pos.y) + 1));
 
+        let { r, g, b, a } = queryLeftCanvasPixel(x, 399 - y);
+        let right = queryPixel(x, 399 - y);
+        let rDiff = (r - right.r) * (r - right.r);
+        let gDiff = (g - right.g) * (g - right.g);
+        let bDiff = (b - right.b) * (b - right.b);
+        // let aDiff = (a - right.a) * (a - right.a);
+        let diff = Math.sqrt(rDiff + gDiff + bDiff) / Math.sqrt(255 * 255 * 3);
+        diff = Math.round(10000 - diff * 100 * 100) / 100;
+
         const blocks = getPointerBlocks(x, y);
         const first = blocks[0];
         if (first) {
@@ -267,28 +275,15 @@ export function setupOverlay(editor: ace.Editor) {
                 })\n` +
                 `bottomLeft = [${first.bottomLeft.px}, ${first.bottomLeft.py}]\n` +
                 `topRight = [${first.topRight.px}, ${first.topRight.py}]\n` +
-                `size = [${first.size.px}, ${first.size.py}]`;
+                `size = [${first.size.px}, ${first.size.py}]\n` +
+                `color = [${r}, ${g}, ${b}, ${a}] (similarity ${diff}%)`;
 
-            if (first.typ === 0) {
-                const block = first as SimpleBlock;
-                text += `\ncolor = [${block.color.r}, ${block.color.g}, ${block.color.b}, ${block.color.a}]`;
-                // simple
-                updateTargetBlock(
-                    block.bottomLeft.px,
-                    block.bottomLeft.py,
-                    block.size.px,
-                    block.size.py
-                );
-            } else {
-                // complex
-                const block = first as ComplexBlock;
-                updateTargetBlock(
-                    block.bottomLeft.px,
-                    block.bottomLeft.py,
-                    block.size.px,
-                    block.size.py
-                );
-            }
+            updateTargetBlock(
+                first.bottomLeft.px,
+                first.bottomLeft.py,
+                first.size.px,
+                first.size.py
+            );
             inspectLayer.show();
             (
                 document.getElementById("leftCanvasText") as HTMLDivElement
