@@ -368,19 +368,65 @@ export function setupOverlay(editor: ace.Editor) {
                     const { r, g, b, a } = queryPixel(x, y);
                     const id = getCurrentGlobalId();
 
-                    let move =
-                        `cut[${targetBlock}][${targetX},${targetY}]\n` +
-                        `color[${targetBlock}.1][${r},${g},${b},${a}]\n` +
-                        `cut[${targetBlock}.1][${targetX2},${targetY2}]\n` +
-                        `color[${targetBlock}.1.0][${prevR},${prevG},${prevB},${prevA}]\n` +
-                        `color[${targetBlock}.1.1][${prevR},${prevG},${prevB},${prevA}]\n` +
-                        `color[${targetBlock}.1.2][${prevR},${prevG},${prevB},${prevA}]\n` +
-                        `merge[${targetBlock}.1.0][${targetBlock}.1.3]\n` +
-                        `merge[${targetBlock}.1.1][${targetBlock}.1.2]\n` +
-                        `merge[${id + 1}][${id + 2}]\n` +
-                        `merge[${targetBlock}.0][${targetBlock}.3]\n` +
-                        `merge[${id + 3}][${targetBlock}.2]\n` +
-                        `merge[${id + 4}][${id + 5}]\n`;
+                    let move = `cut[${targetBlock}][${targetX},${targetY}]\n`;
+
+                    if (targetX < targetX2 && targetY >= targetY2) {
+                        // 右下
+                        move +=
+                            `color[${targetBlock}.1][${r},${g},${b},${a}]\n` +
+                            `cut[${targetBlock}.1][${targetX2},${targetY2}]\n` +
+                            `color[${targetBlock}.1.0][${prevR},${prevG},${prevB},${prevA}]\n` +
+                            `color[${targetBlock}.1.1][${prevR},${prevG},${prevB},${prevA}]\n` +
+                            `color[${targetBlock}.1.2][${prevR},${prevG},${prevB},${prevA}]\n` +
+                            `merge[${targetBlock}.1.0][${targetBlock}.1.3]\n` +
+                            `merge[${targetBlock}.1.1][${targetBlock}.1.2]\n` +
+                            `merge[${id + 1}][${id + 2}]\n` +
+                            `merge[${targetBlock}.0][${targetBlock}.3]\n` +
+                            `merge[${id + 3}][${targetBlock}.2]\n` +
+                            `merge[${id + 4}][${id + 5}]\n`;
+                    } else if (targetX >= targetX2 && targetY >= targetY2) {
+                        // 左下
+                        move +=
+                            `color[${targetBlock}.0][${r},${g},${b},${a}]\n` +
+                            `cut[${targetBlock}.0][${targetX2},${targetY2}]\n` +
+                            `color[${targetBlock}.0.0][${prevR},${prevG},${prevB},${prevA}]\n` +
+                            `color[${targetBlock}.0.1][${prevR},${prevG},${prevB},${prevA}]\n` +
+                            `color[${targetBlock}.0.3][${prevR},${prevG},${prevB},${prevA}]\n` +
+                            `merge[${targetBlock}.0.0][${targetBlock}.0.3]\n` +
+                            `merge[${targetBlock}.0.1][${targetBlock}.0.2]\n` +
+                            `merge[${id + 1}][${id + 2}]\n` +
+                            `merge[${targetBlock}.1][${targetBlock}.2]\n` +
+                            `merge[${id + 3}][${targetBlock}.3]\n` +
+                            `merge[${id + 4}][${id + 5}]\n`;
+                    } else if (targetX < targetX2 && targetY < targetY2) {
+                        // 右上
+                        move +=
+                            `color[${targetBlock}.2][${r},${g},${b},${a}]\n` +
+                            `cut[${targetBlock}.2][${targetX2},${targetY2}]\n` +
+                            `color[${targetBlock}.2.2][${prevR},${prevG},${prevB},${prevA}]\n` +
+                            `color[${targetBlock}.2.1][${prevR},${prevG},${prevB},${prevA}]\n` +
+                            `color[${targetBlock}.2.3][${prevR},${prevG},${prevB},${prevA}]\n` +
+                            `merge[${targetBlock}.2.0][${targetBlock}.2.3]\n` +
+                            `merge[${targetBlock}.2.1][${targetBlock}.2.2]\n` +
+                            `merge[${id + 1}][${id + 2}]\n` +
+                            `merge[${targetBlock}.0][${targetBlock}.3]\n` +
+                            `merge[${id + 3}][${targetBlock}.1]\n` +
+                            `merge[${id + 4}][${id + 5}]\n`;
+                    } else if (targetX >= targetX2 && targetY < targetY2) {
+                        // 左上
+                        move +=
+                            `color[${targetBlock}.3][${r},${g},${b},${a}]\n` +
+                            `cut[${targetBlock}.3][${targetX2},${targetY2}]\n` +
+                            `color[${targetBlock}.3.0][${prevR},${prevG},${prevB},${prevA}]\n` +
+                            `color[${targetBlock}.3.2][${prevR},${prevG},${prevB},${prevA}]\n` +
+                            `color[${targetBlock}.3.3][${prevR},${prevG},${prevB},${prevA}]\n` +
+                            `merge[${targetBlock}.3.0][${targetBlock}.3.3]\n` +
+                            `merge[${targetBlock}.3.1][${targetBlock}.3.2]\n` +
+                            `merge[${id + 1}][${id + 2}]\n` +
+                            `merge[${targetBlock}.1][${targetBlock}.2]\n` +
+                            `merge[${id + 3}][${targetBlock}.0]\n` +
+                            `merge[${id + 4}][${id + 5}]\n`;
+                    }
 
                     editor.setValue(editor.getValue() + move);
                     if (!isContMode()) {
@@ -503,7 +549,7 @@ export function setupOverlay(editor: ace.Editor) {
                 } else if (targetX2 < 0 && targetY2 < 0) {
                     targetX2 = x;
                     targetY2 = y;
-                    let { r, g, b, a } = queryLeftCanvasPixel(x, y);
+                    let { r, g, b, a } = queryLeftCanvasPixel(x, 399 - y); // 場所によってyの意味が違うので補正(後で整理)
                     prevR = r;
                     prevG = g;
                     prevB = b;
