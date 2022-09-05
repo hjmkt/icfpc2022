@@ -22,6 +22,7 @@ let prevR = 0;
 let prevG = 0;
 let prevB = 0;
 let prevA = 0;
+let currentGrid = 1;
 
 export function setTool(toolName: string) {
     curTool = toolName;
@@ -55,6 +56,17 @@ export function setTool(toolName: string) {
 function isContMode(): boolean {
     const check = document.getElementById("contCheck") as HTMLInputElement;
     return Boolean(check.checked);
+}
+
+export function setGrid(value: number) {
+    currentGrid = value;
+}
+
+function applyGrid(pos: { x: number; y: number }): { x: number; y: number } {
+    return {
+        x: Math.floor(pos.x / currentGrid) * currentGrid,
+        y: Math.floor(pos.y / currentGrid) * currentGrid,
+    };
 }
 
 export function setupOverlay(editor: ace.Editor) {
@@ -292,12 +304,12 @@ export function setupOverlay(editor: ace.Editor) {
     }
 
     rightCanvas.on("pointermove", () => {
-        const pos = rightCanvas.getRelativePointerPosition();
+        const pos = applyGrid(rightCanvas.getRelativePointerPosition());
         updateLines(pos);
     });
 
     leftCanvas.on("pointermove", () => {
-        const pos = leftCanvas.getRelativePointerPosition();
+        const pos = applyGrid(leftCanvas.getRelativePointerPosition());
         updateLines(pos);
 
         queryPointerBlocks(pos);
@@ -318,7 +330,7 @@ export function setupOverlay(editor: ace.Editor) {
     });
 
     rightCanvas.on("pointerdown", () => {
-        const pos = rightCanvas.getRelativePointerPosition();
+        const pos = applyGrid(rightCanvas.getRelativePointerPosition());
         const x = Math.max(0, Math.min(399, Math.floor(pos.x)));
         const y = Math.max(0, Math.min(399, Math.floor(pos.y) + 1));
         const { r, g, b, a } = queryPixel(x, y);
@@ -485,7 +497,7 @@ export function setupOverlay(editor: ace.Editor) {
     });
 
     leftCanvas.on("pointerdown", () => {
-        const pos = leftCanvas.getRelativePointerPosition();
+        const pos = applyGrid(leftCanvas.getRelativePointerPosition());
         const x = Math.max(0, Math.min(399, Math.floor(pos.x)));
         const y = 399 - Math.max(0, Math.min(399, Math.floor(pos.y) + 1));
         const blocks = getPointerBlocks(x, y);

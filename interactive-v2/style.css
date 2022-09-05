@@ -129,3 +129,16 @@ canvas {
     left: 730px;
     font-family: monospace;
 }
+
+#gridInfo {
+    position: fixed;
+    top: 406px;
+    left: 850px;
+    font-family: monospace;
+}
+
+#grid {
+    position: fixed;
+    top: 420px;
+    left: 895px;
+}

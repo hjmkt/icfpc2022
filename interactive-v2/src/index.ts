@@ -1,7 +1,7 @@
 import * as ace from "brace";
 import "brace/theme/solarized_light";
 import { runCode, untilLine } from "./utils";
-import { setTool, setupOverlay } from "./canvasOverlay";
+import { setGrid, setTool, setupOverlay } from "./canvasOverlay";
 import { changeProblem, getCurrentSpec } from "./problems";
 import { parseAndDownloadIsl, parseIsl } from "./parser";
 import axios from "axios";
@@ -85,6 +85,12 @@ commandRunButton.addEventListener("click", () => {
         command,
         isl,
     });
+});
+
+const grid = document.getElementById("grid") as HTMLSelectElement;
+grid.addEventListener("change", () => {
+    const value = Number(grid.value);
+    setGrid(value);
 });
 
 document.addEventListener("DOMContentLoaded", () => {
