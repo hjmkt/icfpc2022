@@ -41,6 +41,7 @@ export function setTool(toolName: string) {
         case "CCM(右上)":
         case "CCM(左上)":
         case "矩形":
+        case "CCCM(中央)":
             lineColor("red");
             break;
         default:
@@ -459,6 +460,32 @@ export function setupOverlay(editor: ace.Editor) {
                     ccmCommon(3);
                 }
                 break;
+            case "CCCM(中央)":
+                if (targetBlock !== "" && targetY2 >= 0 && targetX2 >= 0) {
+                    const { r, g, b, a } = queryPixel(x, y);
+                    const id = getCurrentGlobalId();
+                    let move =
+                        `cut[${targetBlock}][${targetX},${targetY}]\n` +
+                        `cut[${targetBlock}.1][${targetX2},${targetY2}]\n` +
+                        `color[${targetBlock}.1.3][${r},${g},${b},${a}]\n` +
+                        `merge[${targetBlock}.1.0][${targetBlock}.1.3]\n` +
+                        `merge[${targetBlock}.1.1][${targetBlock}.1.2]\n` +
+                        `merge[${id + 1}][${id + 2}]\n` +
+                        `merge[${targetBlock}.0][${targetBlock}.3]\n` +
+                        `merge[${id + 3}][${targetBlock}.2]\n` +
+                        `merge[${id + 4}][${id + 5}]\n`;
+
+                    editor.setValue(editor.getValue() + move);
+                    if (!isContMode()) {
+                        setTool("Inspect");
+                    } else {
+                        targetBlock = "";
+                        targetX2 = -1;
+                        targetY2 = -1;
+                    }
+                    runCode(editor.getValue(), true, isV2ScoreMode());
+                }
+                break;
         }
     });
 
@@ -542,6 +569,7 @@ export function setupOverlay(editor: ace.Editor) {
                 break;
             }
             case "矩形":
+            case "CCCM(中央)":
                 if (targetBlock === "") {
                     targetBlock = first.id;
                     targetX = x;
