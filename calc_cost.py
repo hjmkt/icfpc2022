@@ -2,14 +2,16 @@ from common import *
 from util import *
 from icfpc2022_api import *
 
-def calc_cost(x,y,width,height):
+def calc_cost(x,y,width,height, alternative_cost=False):
     cut_cost = 0
+    pcut_alpha = 3 if alternative_cost else 10
+    lcut_alpha = 2 if alternative_cost else 7
     
     # (x,y)でpcut
-    cut_cost+=10
+    cut_cost+=pcut_alpha
 
     # (x+width, y+height)でpcut
-    cut_cost+=round(10*400*400/((400-x)*(400-y)))
+    cut_cost+=round(pcut_alpha*400*400/((400-x)*(400-y)))
     color_cost=round(5*400*400/(width*height))
 
     # [x:400,y:400]をmerge
@@ -61,35 +63,37 @@ def calc_cost(x,y,width,height):
     return costsum,merge_flag1,merge_flag2
 
 
-def cost_calc_fin(x,y,width,height):
+def cost_calc_fin(x,y,width,height, alternative_cost=False):
+    pcut_alpha = 3 if alternative_cost else 10
+    lcut_alpha = 2 if alternative_cost else 7
     if x==0:
         if x+width==400:
             if y==0:
                 if y+height==400:
-                    return 5
+                    return 5,-1,-1,-1
                 else:
-                    cut_cost=7
+                    cut_cost=lcut_alpha
                     color_cost=round(5*400*400/(width*height))
                     mergecost=round(400*400/(400*max(height,400-height)))
 
                     return cut_cost+color_cost+mergecost,-1,-1,-1
             else:
                 if y+height==400:
-                    cut_cost=7
+                    cut_cost=lcut_alpha
                     color_cost=round(5*400*400/(width*height))
                     mergecost=round(400*400/(400*max(height,400-height)))
 
                     return cut_cost+color_cost+mergecost,-1,-1,-1
                 else:
                     if y+height>400-y: # 上からcut, 下からmerge
-                        cut_cost=7+round(7*400/(y+height))
+                        cut_cost=lcut_alpha+round(lcut_alpha*400/(y+height))
                         color_cost=round(5*400*400/(width*height))
                         mergecost=round(1*400*400/(width*max(y,height)))+round(1*400*400/(width*max(y+height,400-y-height)))
 
                         return cut_cost+color_cost+mergecost,-1,-1,-1
 
                     else: # 下からcut, 上からmerge
-                        cut_cost=7+round(7*400/(400-y))
+                        cut_cost=lcut_alpha+round(lcut_alpha*400/(400-y))
                         color_cost=round(5*400*400/(width*height))
                         mergecost=round(1*400*400/(width*max(400-y-height,height)))+round(1*400*400/(width*max(y,400-y)))
 
@@ -97,14 +101,14 @@ def cost_calc_fin(x,y,width,height):
         else:
             if y==0:
                 if y+height==400:
-                    cut_cost=7
+                    cut_cost=lcut_alpha
                     color_cost=round(5*400*400/(width*height))
                     mergecost=round(400*400/(400*max(width,400-width)))
 
                     return cut_cost+color_cost+mergecost,-1,-1,-1
                 
                 else:
-                    cut_cost=10
+                    cut_cost=pcut_alpha
                     color_cost=round(5*400*400/(width*height))
 
                     a,b,c,d=400-height,height,width,400-width
@@ -131,7 +135,7 @@ def cost_calc_fin(x,y,width,height):
                     return cut_cost+color_cost+mergecost,-1,merge_flag1,-1
             else:
                 if y+height==400:
-                    cut_cost=10
+                    cut_cost=pcut_alpha
                     color_cost=round(5*400*400/(width*height))
 
                     a,b,c,d=400-height,height,width,400-width
@@ -160,7 +164,7 @@ def cost_calc_fin(x,y,width,height):
                 else:
                     # pcutした後にlcutするパターン
                     if y+height>400-y: # 上をpcut
-                        cut_cost=10+round(7*400*400/(width*(y+height)))
+                        cut_cost=pcut_alpha+round(lcut_alpha*400*400/(width*(y+height)))
                         color_cost=round(5*400*400/(width*height))
 
                         merge0=round(400*400/(width*max(y,height)))
@@ -188,7 +192,7 @@ def cost_calc_fin(x,y,width,height):
                         return cut_cost+color_cost+mergecost,-1,merge_flag1,-1
 
                     else: # 下をpcut
-                        cut_cost=10+round(7*400*400/(width*(400-y)))
+                        cut_cost=pcut_alpha+round(lcut_alpha*400*400/(width*(400-y)))
                         color_cost=round(5*400*400/(width*height))
 
                         merge0=round(400*400/(width*max(400-y-height,height)))
@@ -220,13 +224,13 @@ def cost_calc_fin(x,y,width,height):
         if x+width==400:
             if y==0:
                 if y+height==400:
-                    cut_cost=7
+                    cut_cost=lcut_alpha
                     color_cost=round(5*400*400/(width*height))
                     mergecost=round(400*400/(400*max(width,400-width)))
 
                     return cut_cost+color_cost+mergecost,-1,-1,-1
                 else:
-                    cut_cost=10
+                    cut_cost=pcut_alpha
                     color_cost=round(5*400*400/(width*height))
 
                     a,b,c,d=400-height,height,width,400-width
@@ -253,7 +257,7 @@ def cost_calc_fin(x,y,width,height):
                     return cut_cost+color_cost+mergecost,-1,merge_flag1,-1
             else:
                 if y+height==400:
-                    cut_cost=10
+                    cut_cost=pcut_alpha
                     color_cost=round(5*400*400/(width*height))
 
                     a,b,c,d=400-height,height,width,400-width
@@ -281,7 +285,7 @@ def cost_calc_fin(x,y,width,height):
                 else:
                     # pcutした後にlcutするパターン
                     if y+height>400-y: # 上をpcut
-                        cut_cost=10+round(7*400*400/(width*(y+height)))
+                        cut_cost=pcut_alpha+round(lcut_alpha*400*400/(width*(y+height)))
                         color_cost=round(5*400*400/(width*height))
 
                         merge0=round(400*400/(width*max(y,height)))
@@ -309,7 +313,7 @@ def cost_calc_fin(x,y,width,height):
                         return cut_cost+color_cost+mergecost,-1,merge_flag1,-1
 
                     else: # 下をpcut
-                        cut_cost=10+round(7*400*400/(width*(400-y)))
+                        cut_cost=pcut_alpha+round(lcut_alpha*400*400/(width*(400-y)))
                         color_cost=round(5*400*400/(width*height))
 
                         merge0=round(400*400/(width*max(400-y-height,height)))
@@ -339,14 +343,14 @@ def cost_calc_fin(x,y,width,height):
             if y==0:
                 if y+height==400:
                     if x+width>400-x: # 右からcut, 左からmerge
-                        cut_cost=7+round(7*400*400/(x+width))
+                        cut_cost=lcut_alpha+round(lcut_alpha*400*400/(x+width))
                         color_cost=round(5*400*400/(width*height))
                         mergecost=round(1*400*400/(height*max(x,width)))+round(1*400*400/(height*max(x+width,400-x-width)))
 
                         return cut_cost+color_cost+mergecost,-1,-1,-1
 
                     else: # 左からcut, 右からmerge
-                        cut_cost=7+round(7*400/(400-x))
+                        cut_cost=lcut_alpha+round(lcut_alpha*400/(400-x))
                         color_cost=round(5*400*400/(width*height))
                         mergecost=round(1*400*400/(height*max(400-x-width,width)))+round(1*400*400/(height*max(x,400-x)))
 
@@ -354,7 +358,7 @@ def cost_calc_fin(x,y,width,height):
                 else:
                     # pcutした後にlcutするパターン
                     if x+width>400-x: # 右をpcut
-                        cut_cost=10+round(7*400*400/(height*(x+width)))
+                        cut_cost=pcut_alpha+round(lcut_alpha*400*400/(height*(x+width)))
                         color_cost=round(5*400*400/(width*height))
 
                         merge0=round(400*400/(height*max(x,width)))
@@ -382,7 +386,7 @@ def cost_calc_fin(x,y,width,height):
                         return cut_cost+color_cost+mergecost,-1,merge_flag1,-1
 
                     else: # 左をpcut
-                        cut_cost=10+round(7*400*400/(height*(400-x)))
+                        cut_cost=pcut_alpha+round(lcut_alpha*400*400/(height*(400-x)))
                         color_cost=round(5*400*400/(width*height))
 
                         merge0=round(400*400/(height*max(400-x-width,width)))
@@ -412,7 +416,7 @@ def cost_calc_fin(x,y,width,height):
                 if y+height==400:
                     # pcutした後にlcutするパターン
                     if x+width>400-x: # 右をpcut
-                        cut_cost=10+round(7*400*400/(height*(x+width)))
+                        cut_cost=pcut_alpha+round(lcut_alpha*400*400/(height*(x+width)))
                         color_cost=round(5*400*400/(width*height))
 
                         merge0=round(400*400/(height*max(x,width)))
@@ -440,7 +444,7 @@ def cost_calc_fin(x,y,width,height):
                         return cut_cost+color_cost+mergecost,-1,merge_flag1,-1
 
                     else: # 左をpcut
-                        cut_cost=10+round(7*400*400/(height*(400-x)))
+                        cut_cost=pcut_alpha+round(lcut_alpha*400*400/(height*(400-x)))
                         color_cost=round(5*400*400/(width*height))
 
                         merge0=round(400*400/(height*max(400-x-width,width)))
@@ -473,7 +477,7 @@ def cost_calc_fin(x,y,width,height):
                     m2flag=0
                     
                     # そのまま
-                    costsum,merge_flag,merge_flag2=calc_cost(x,y,width,height)
+                    costsum,merge_flag,merge_flag2=calc_cost(x,y,width,height, alternative_cost)
 
                     if costmin>costsum:
                         costmin=costsum
@@ -482,7 +486,7 @@ def cost_calc_fin(x,y,width,height):
                         m2flag=merge_flag2
                         
                     # 左右反転
-                    costsum,merge_flag,merge_flag2=calc_cost(400-x-width,y,width,height)
+                    costsum,merge_flag,merge_flag2=calc_cost(400-x-width,y,width,height, alternative_cost)
 
                     if costmin>costsum:
                         costmin=costsum
@@ -491,7 +495,7 @@ def cost_calc_fin(x,y,width,height):
                         m2flag=merge_flag2
 
                     # 上下反転
-                    costsum,merge_flag,merge_flag2=calc_cost(x,400-y-height,width,height)
+                    costsum,merge_flag,merge_flag2=calc_cost(x,400-y-height,width,height, alternative_cost)
 
                     if costmin>costsum:
                         costmin=costsum
@@ -500,7 +504,7 @@ def cost_calc_fin(x,y,width,height):
                         m2flag=merge_flag2
 
                     # 上下左右反転
-                    costsum,merge_flag,merge_flag2=calc_cost(400-x-width,400-y-height,width,height)
+                    costsum,merge_flag,merge_flag2=calc_cost(400-x-width,400-y-height,width,height, alternative_cost)
 
                     if costmin>costsum:
                         costmin=costsum
