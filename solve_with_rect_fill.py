@@ -10,7 +10,7 @@ from rect_fill import *
 from isl_json_reader import *
 import argparse
 
-def solve(problem, seed, merge, token, resume):
+def solve(problem, seed, merge, token, resume_moves):
 
     width = 400
     height = 400
@@ -92,8 +92,7 @@ def solve(problem, seed, merge, token, resume):
         canvas.pixels = initial_image.copy()
         canvas_for_cost.pixels = initial_image.copy()
 
-    if resume is not None:
-        resume_moves = read_json(resume)
+    if len(resume_moves)>0:
         for move in resume_moves:
             canvas.exec_move(move)
         merge_moves = []
@@ -187,5 +186,9 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--token", type=str)
     parser.add_argument("-r", "--resume", type=str)
     args = parser.parse_args()
+    if args.resume is not None:
+        resume_moves = read_json(resume)
+    else:
+        resume_moves = []
 
-    solve(args.problem, args.seed, args.merge, args.token, args.resume)
+    solve(args.problem, args.seed, args.merge, args.token, resume_moves)

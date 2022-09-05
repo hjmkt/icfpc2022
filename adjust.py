@@ -208,4 +208,4 @@ isl_path = f"./isl_p{args.problem}_{round(score)}.txt"
 with open(isl_path, "w") as f:
     print(isl, file=f)
 
-solve(args.problem, args.seed, 0, args.token, isl_path)
+solve(args.problem, args.seed, 0, args.token, MOVES2)
