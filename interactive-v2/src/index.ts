@@ -53,7 +53,7 @@ pixelate.addEventListener("change", () => {
     const factor = Number(pixelate.value);
     changeProblem(problemSelector.value, factor).then(() => {
         const spec = getCurrentSpec();
-        runCode("", true, !!spec.sourcePngJSON);
+        runCode(editor.getValue(), true, !!spec.sourcePngJSON);
     });
 });
 
