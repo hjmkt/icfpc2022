@@ -187,7 +187,7 @@ if __name__ == "__main__":
     parser.add_argument("-r", "--resume", type=str)
     args = parser.parse_args()
     if args.resume is not None:
-        resume_moves = read_json(resume)
+        resume_moves = read_json(args.resume)
     else:
         resume_moves = []
 
