@@ -10,12 +10,21 @@ import time
 from rect_fill import *
 import argparse
 from calc_cost import *
+from solve_with_rect_fill import solve
 
-isl_json_path="./isl1.json"
+parser = argparse.ArgumentParser()
+parser.add_argument("-p", "--problem", type=int)
+parser.add_argument("-s", "--seed", type=int)
+# parser.add_argument("-m", "--merge", type=int)
+parser.add_argument("-t", "--token", type=str)
+parser.add_argument("-r", "--resume", type=str)
+args = parser.parse_args()
+
+isl_json_path= args.resume
 MOVES=read_json(isl_json_path)
 RECT=[]
 
-target_image = cv2.imread(f"./1.png", cv2.IMREAD_UNCHANGED)
+target_image = cv2.imread(f"./{args.problem}.png", cv2.IMREAD_UNCHANGED)
 target_image = target_image[::-1, :, :]
 target_image = cv2.cvtColor(target_image, cv2.COLOR_BGRA2RGBA)
 
@@ -193,6 +202,10 @@ for x,y,width,height,color in RECT:
 while MOVES2[-1].move_type=="merge":
     MOVES2.pop()
 
-print(canvas2.compute_score(target_image))
-print(moves_to_isl(MOVES2))
-    
+score = canvas2.compute_score(target_image)
+isl = moves_to_isl(MOVES2)
+isl_path = f"./isl_p{args.problem}_{round(score)}.txt"
+with open(isl_path, "w") as f:
+    print(isl, file=f)
+
+solve(args.problem, args.seed, 0, args.token, isl_path)
