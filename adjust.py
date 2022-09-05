@@ -20,6 +20,8 @@ parser.add_argument("-t", "--token", type=str)
 parser.add_argument("-r", "--resume", type=str)
 args = parser.parse_args()
 
+print("start adjust", file=sys.stderr)
+
 isl_json_path= args.resume
 MOVES=read_json(isl_json_path)
 RECT=[]
@@ -59,8 +61,10 @@ def calc_rect_score(RECT)  :
 
 USED=[0]*(400*400)
 
+print("start adjust phase1", file=sys.stderr)
+
 for ind in range(len(RECT)-1,-1,-1):
-    print(ind)
+    print(ind, file=sys.stderr)
 
     while RECT[ind][0]>0:
         x,y,width,height,_=RECT[ind]
@@ -120,6 +124,7 @@ for ind in range(len(RECT)-1,-1,-1):
 
 # ここから、スコア計算をして削る
 
+print("start adjust phase2", file=sys.stderr)
 best_score=calc_rect_score(RECT)
 
 for i in range(len(RECT)-1,-1,-1):
@@ -128,7 +133,7 @@ for i in range(len(RECT)-1,-1,-1):
     f0=f1=f2=f3=1
 
     while True:
-        print(i,len(RECT),best_score)
+        print(i,len(RECT),best_score, file=sys.stderr)
         if x>0 and f0==1:
             RECT[i][0]-=1
             RECT[i][2]+=1
