@@ -65,7 +65,7 @@ export function setGrid(value: number) {
 function applyGrid(pos: { x: number; y: number }): { x: number; y: number } {
     return {
         x: Math.floor(pos.x / currentGrid) * currentGrid,
-        y: Math.floor(pos.y / currentGrid) * currentGrid,
+        y: Math.floor((pos.y + 2) / currentGrid) * currentGrid - 2,
     };
 }
 
