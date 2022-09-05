@@ -96,7 +96,7 @@ canvas {
     position: fixed;
     top: 550px;
     left: 10px;
-    width: 500px;
+    width: 700px;
     height: 22px;
     font-family: monospace;
 }
@@ -104,7 +104,7 @@ canvas {
 #commandRun {
     position: fixed;
     top: 550px;
-    left: 520px;
+    left: 720px;
     width: 60px;
     height: 28px;
     font-family: monospace;
@@ -120,5 +120,25 @@ canvas {
 #pixelate {
     position: fixed;
     top: 420px;
+    left: 795px;
+}
+
+#pixelateInfo {
+    position: fixed;
+    top: 406px;
     left: 730px;
+    font-family: monospace;
+}
+
+#gridInfo {
+    position: fixed;
+    top: 406px;
+    left: 850px;
+    font-family: monospace;
+}
+
+#grid {
+    position: fixed;
+    top: 420px;
+    left: 895px;
 }
