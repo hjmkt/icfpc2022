@@ -1,60 +1,198 @@
 from common import *
-from minimize_cost_of_rectangle_cut import *
+import json
+from isl_json_reader import *
+from common import *
+from util import *
+from icfpc2022_api import *
 import cv2
+import sys
+import time
+from rect_fill import *
+import argparse
+from calc_cost import *
 
-CUT_X = (0, 40, 80, 120, 160, 200, 240, 280, 320, 360, 400)  # 切りたいx座標
-CUT_Y = (0, 40, 80, 120, 160, 200, 240, 280, 320, 360, 400)  # 切りたいy座標
+isl_json_path="./isl1.json"
+MOVES=read_json(isl_json_path)
+RECT=[]
 
-# 切りたいx座標のtuple,y座標のtupleを入力すると、切り方が返ってくる。
-cut_ans_order, cut_ans_order_for_test = minimize_cut_cost(CUT_X, CUT_Y)
-
-
-target_image = cv2.imread("./1.png", cv2.IMREAD_UNCHANGED)
+target_image = cv2.imread(f"./1.png", cv2.IMREAD_UNCHANGED)
 target_image = target_image[::-1, :, :]
 target_image = cv2.cvtColor(target_image, cv2.COLOR_BGRA2RGBA)
-# print(target_image.shape)
-
-# similarity = canvas.compute_similarity(target_image)
-# print(f"similarity = {similarity}")
-# cv2.imshow("pre", canvas.pixels.astype(np.uint8))
-# cv2.waitKey(0)
 
 canvas = Canvas(400, 400)
 
-for x, y in cut_ans_order_for_test:
-    canvas.exec_move(Move(x, y))
+for move in MOVES:
+    if move.move_type=="color":
+        block_id = move.options["block_id"]
+        color = move.options["color"]
+        block = canvas.blocks[block_id]
 
+        RECT.append([block.x,block.y,block.width,block.height,color])
 
-cost = canvas.get_current_cost()
-similarity = canvas.compute_similarity(target_image)
-score = canvas.compute_score(target_image)
-#print(f"cost = {cost}")
-#print(f"similarity = {similarity}")
-#print(f"score = {score}")
-# cv2.imshow("post", cv2.cvtColor(canvas.pixels.astype(np.uint8)[::-1, :, :], cv2.COLOR_BGRA2RGBA))
-# cv2.imwrite("post.png", cv2.cvtColor(canvas.pixels.astype(np.uint8)[::-1, :, :], cv2.COLOR_BGRA2RGBA))
-# cv2.waitKey(0)
+    canvas.exec_move(move)
 
-sum_blockpic = dict()
-masu_blocks = dict()
+best_score=canvas.compute_score(target_image)
 
-for i in range(400):
-    for j in range(400):
-        bid = canvas.coord_to_block_id[i][j]
-        if bid in sum_blockpic:
-            masu_blocks[bid] += 1
-            sum_blockpic[bid] += target_image[i][j]
+def calc_rect_score(RECT)  :
+    canvas2 = Canvas(400, 400)
+    MOVES2=[]
+    
+    for x,y,width,height,color in RECT:
+        costmin,hflag,m1flag,m2flag=cost_calc_fin(x,y,width,height)
+        moves=change_hmflag_to_move(canvas2.global_id,x,y,width,height,color,hflag,m1flag,m2flag)
+        MOVES2+=moves
+        for m in moves:
+            canvas2.exec_move(m)
+
+    return canvas2.compute_score(target_image)
+
+# スコア計算せずに削れるコストを削る
+
+USED=[0]*(400*400)
+
+for ind in range(len(RECT)-1,-1,-1):
+    print(ind)
+
+    while RECT[ind][0]>0:
+        x,y,width,height,_=RECT[ind]
+        flag=1
+        for j in range(y,y+height):
+            if USED[(x-1)*400+j]==0:
+                flag=0
+                break
+        if flag==1:
+            RECT[ind][0]-=1
+            RECT[ind][2]+=1
         else:
-            sum_blockpic[bid] = np.array([0, 0, 0, 0])
-            masu_blocks[bid] = 1
-            sum_blockpic[bid] += target_image[i][j]
+            break
 
+    while RECT[ind][1]>0:
+        x,y,width,height,_=RECT[ind]
+        flag=1
+        for i in range(x,x+width):
+            if USED[i*400+y-1]==0:
+                flag=0
+                break
+        if flag==1:
+            RECT[ind][1]-=1
+            RECT[ind][3]+=1
+        else:
+            break
 
-for s in cut_ans_order:
-    print(s)
+    while RECT[ind][0]+RECT[ind][2]<400:
+        x,y,width,height,_=RECT[ind]
+        flag=1
+        for j in range(y,y+height):
+            if USED[(x+width)*400+j]==0:
+                flag=0
+                break
+        if flag==1:
+            RECT[ind][2]+=1
+        else:
+            break
 
-# 各ブロックの色をその平均値にする
-for block_id in sum_blockpic:
-    C = sum_blockpic[block_id]/masu_blocks[block_id]
-    print("color"+"["+str(block_id)+"]"+"["+str(round(C[0]))+"," +
-          str(round(C[1]))+","+str(round(C[2]))+","+str(round(C[3]))+"]")
+    while RECT[ind][1]+RECT[ind][3]<400:
+        x,y,width,height,_=RECT[ind]
+        flag=1
+        for i in range(x,x+width):
+            if USED[i*400+y+height]==0:
+                flag=0
+                break
+        if flag==1:
+            RECT[ind][3]+=1
+        else:
+            break
+
+    x,y,width,height,_=RECT[ind]
+
+    for i in range(x,x+width):
+        for j in range(y,y+height):
+            USED[i*400+j]=1        
+
+# ここから、スコア計算をして削る
+
+best_score=calc_rect_score(RECT)
+
+for i in range(len(RECT)-1,-1,-1):
+    x,y,width,height,color=RECT[i]
+
+    f0=f1=f2=f3=1
+
+    while True:
+        print(i,len(RECT),best_score)
+        if x>0 and f0==1:
+            RECT[i][0]-=1
+            RECT[i][2]+=1
+            x-=1
+            width+=1
+                    
+            sc=calc_rect_score(RECT)
+            if sc<=best_score:
+                best_score=sc
+                continue
+            else:
+                RECT[i][0]+=1
+                RECT[i][2]-=1
+                x+=1
+                width-=1
+                f0=0
+
+        if y>0 and f1==1:
+            RECT[i][1]-=1
+            RECT[i][3]+=1
+            y-=1
+            height+=1            
+
+            sc=calc_rect_score(RECT)
+            if sc<=best_score:
+                best_score=sc
+                continue
+            else:
+                RECT[i][1]+=1
+                RECT[i][3]-=1
+                y+=1
+                height-=1
+                f1=0
+
+        if x+width<400 and f2==1:
+            RECT[i][2]+=1
+            width+=1
+
+            sc=calc_rect_score(RECT)
+            if sc<=best_score:
+                best_score=sc
+                continue
+            else:
+                RECT[i][2]-=1
+                width-=1
+                f2=0
+
+        if y+height<400 and f3==1:
+            RECT[i][3]+=1
+            height+=1
+
+            sc=calc_rect_score(RECT)
+            if sc<=best_score:
+                best_score=sc
+                continue
+            else:
+                RECT[i][3]-=1
+                height-=1
+                f3=0
+        break
+
+canvas2 = Canvas(400, 400)
+MOVES2=[]
+for x,y,width,height,color in RECT:
+    costmin,hflag,m1flag,m2flag=cost_calc_fin(x,y,width,height)
+    moves=change_hmflag_to_move(canvas2.global_id,x,y,width,height,color,hflag,m1flag,m2flag)
+    MOVES2+=moves
+    for m in moves:
+        canvas2.exec_move(m)
+
+while MOVES2[-1].move_type=="merge":
+    MOVES2.pop()
+
+print(canvas2.compute_score(target_image))
+print(moves_to_isl(MOVES2))
+    
