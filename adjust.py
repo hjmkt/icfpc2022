@@ -20,6 +20,10 @@ parser.add_argument("-t", "--token", type=str)
 parser.add_argument("-r", "--resume", type=str)
 args = parser.parse_args()
 
+alternative_cost = False
+if args.problem>=36:
+    alternative_cost = True
+
 print("start adjust", file=sys.stderr)
 
 isl_json_path= args.resume
@@ -30,7 +34,7 @@ target_image = cv2.imread(f"./{args.problem}.png", cv2.IMREAD_UNCHANGED)
 target_image = target_image[::-1, :, :]
 target_image = cv2.cvtColor(target_image, cv2.COLOR_BGRA2RGBA)
 
-canvas = Canvas(400, 400)
+canvas = Canvas(400, 400,alternative_cost)
 
 for move in MOVES:
     if move.move_type=="color":
@@ -45,11 +49,11 @@ for move in MOVES:
 best_score=canvas.compute_score(target_image)
 
 def calc_rect_score(RECT)  :
-    canvas2 = Canvas(400, 400)
+    canvas2 = Canvas(400, 400,alternative_cost)
     MOVES2=[]
     
     for x,y,width,height,color in RECT:
-        costmin,hflag,m1flag,m2flag=cost_calc_fin(x,y,width,height)
+        costmin,hflag,m1flag,m2flag=cost_calc_fin(x,y,width,height,alternative_cost)
         moves=change_hmflag_to_move(canvas2.global_id,x,y,width,height,color,hflag,m1flag,m2flag)
         MOVES2+=moves
         for m in moves:
@@ -195,10 +199,10 @@ for i in range(len(RECT)-1,-1,-1):
                 f3=0
         break
 
-canvas2 = Canvas(400, 400)
+canvas2 = Canvas(400, 400,alternative_cost)
 MOVES2=[]
 for x,y,width,height,color in RECT:
-    costmin,hflag,m1flag,m2flag=cost_calc_fin(x,y,width,height)
+    costmin,hflag,m1flag,m2flag=cost_calc_fin(x,y,width,height,alternative_cost)
     moves=change_hmflag_to_move(canvas2.global_id,x,y,width,height,color,hflag,m1flag,m2flag)
     MOVES2+=moves
     for m in moves:
