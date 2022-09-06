@@ -28,9 +28,9 @@ for x, y in cut_ans_order_for_test:
 cost = canvas.get_current_cost()
 similarity = canvas.compute_similarity(target_image)
 score = canvas.compute_score(target_image)
-#print(f"cost = {cost}")
-#print(f"similarity = {similarity}")
-#print(f"score = {score}")
+# print(f"cost = {cost}")
+# print(f"similarity = {similarity}")
+# print(f"score = {score}")
 # cv2.imshow("post", cv2.cvtColor(canvas.pixels.astype(np.uint8)[::-1, :, :], cv2.COLOR_BGRA2RGBA))
 # cv2.imwrite("post.png", cv2.cvtColor(canvas.pixels.astype(np.uint8)[::-1, :, :], cv2.COLOR_BGRA2RGBA))
 # cv2.waitKey(0)
@@ -55,6 +55,19 @@ for s in cut_ans_order:
 
 # 各ブロックの色をその平均値にする
 for block_id in sum_blockpic:
-    C = sum_blockpic[block_id]/masu_blocks[block_id]
-    print("color"+"["+str(block_id)+"]"+"["+str(round(C[0]))+"," +
-          str(round(C[1]))+","+str(round(C[2]))+","+str(round(C[3]))+"]")
+    C = sum_blockpic[block_id] / masu_blocks[block_id]
+    print(
+        "color"
+        + "["
+        + str(block_id)
+        + "]"
+        + "["
+        + str(round(C[0]))
+        + ","
+        + str(round(C[1]))
+        + ","
+        + str(round(C[2]))
+        + ","
+        + str(round(C[3]))
+        + "]"
+    )

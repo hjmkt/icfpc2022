@@ -1,5 +1,3 @@
-from common import *
-
 def move_to_isl(move):
     match move.move_type:
         case "pcut":
@@ -10,7 +8,9 @@ def move_to_isl(move):
             block_id = move.options["block_id"]
             orientation = move.options["orientation"]
             offset = move.options["offset"]
-            return f"cut[{block_id}][{'X' if orientation=='vertical' else 'Y'}][{offset}]"
+            return (
+                f"cut[{block_id}][{'X' if orientation=='vertical' else 'Y'}][{offset}]"
+            )
         case "color":
             block_id = move.options["block_id"]
             color = move.options["color"]
@@ -23,6 +23,7 @@ def move_to_isl(move):
             block_id0 = move.options["block_id0"]
             block_id1 = move.options["block_id1"]
             return f"merge[{block_id0}][{block_id1}]"
+
 
 def moves_to_isl(moves):
     isl = []
